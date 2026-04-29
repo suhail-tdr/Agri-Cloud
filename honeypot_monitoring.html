@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visitor Activity Monitor — AgriFarm Honeypot</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link rel="stylesheet" href="css/monitoring.css">
+</head>
+<body>
+<div class="everything">
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">🕵️ ACTIVITY MONITOR</div>
+    <div class="topbar-tag">AGRIFARM HONEYPOT INTELLIGENCE SYSTEM</div>
+  </div>
+  <div class="topbar-right">
+    <div id="clock" style="color:var(--text)">--:--:--</div>
+    <div class="live-badge"><div class="pulse-dot"></div>TRACKING LIVE</div>
+    <div class="email-indicator" id="email-ind" onclick="openSettings()" title="Email Alert Settings">
+      <div class="ei-dot"></div><span id="email-ind-txt">EMAIL ALERTS OFF</span>
+    </div>
+    <button class="ctrl-btn danger" onclick="clearAll()">CLEAR</button>
+    <a href="fake-page.html" target="_blank" class="ctrl-btn">OPEN TRAP ↗</a>
+    <a href="honeypot_dashboard.html" class="ctrl-btn">← DASHBOARD</a>
+  </div>
+</div>
+
+<!-- ── STAT CARDS ── -->
+<div class="stats-grid">
+  <div class="stat-card green">
+    <div class="stat-label">TOTAL EVENTS</div>
+    <div class="stat-num" id="s-total">0</div>
+    <div class="stat-sub">ALL TRACKED ACTIONS</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-label">SIDEBAR CLICKS</div>
+    <div class="stat-num" id="s-clicks">0</div>
+    <div class="stat-sub">BUTTONS PRESSED</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-label">TEXT COPIED</div>
+    <div class="stat-num" id="s-copies">0</div>
+    <div class="stat-sub">DATA HARVESTED</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-label">SUSPICION SCORE</div>
+    <div class="stat-num" id="s-risk">0</div>
+    <div class="stat-sub">RISK POINTS / 100</div>
+  </div>
+</div>
+
+<!-- ── LAYOUT ── -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sb-head">Visitor Fingerprint</div>
+    <div class="fp">
+      <div class="fp-row"><span class="fp-k">Browser</span>     <span class="fp-v g" id="fp-browser">—</span></div>
+      <div class="fp-row"><span class="fp-k">OS</span>          <span class="fp-v"   id="fp-os">—</span></div>
+      <div class="fp-row"><span class="fp-k">Device</span>      <span class="fp-v"   id="fp-device">—</span></div>
+      <div class="fp-row"><span class="fp-k">Screen</span>      <span class="fp-v"   id="fp-screen">—</span></div>
+      <div class="fp-row"><span class="fp-k">Timezone</span>    <span class="fp-v a" id="fp-tz">—</span></div>
+      <div class="fp-row"><span class="fp-k">Language</span>    <span class="fp-v"   id="fp-lang">—</span></div>
+      <div class="fp-row"><span class="fp-k">Time on Page</span><span class="fp-v r" id="fp-timer">—</span></div>
+      <div class="fp-row"><span class="fp-k">Last Seen</span>   <span class="fp-v"   id="fp-last">—</span></div>
+    </div>
+
+    <div class="sb-counts">
+      <div class="sc-mini"><span class="sc-n g" id="c-total">0</span>  <span class="sc-l">Events</span></div>
+      <div class="sc-mini"><span class="sc-n r" id="c-copies">0</span> <span class="sc-l">Copies</span></div>
+      <div class="sc-mini"><span class="sc-n a" id="c-clicks">0</span> <span class="sc-l">Clicks</span></div>
+      <div class="sc-mini"><span class="sc-n b" id="c-secs">0</span>   <span class="sc-l">Sections</span></div>
+    </div>
+
+    <div class="risk-wrap">
+      <div class="risk-top">
+        <span class="risk-lbl">Suspicion Level</span>
+        <span class="risk-tag" id="risk-tag" style="background:var(--gdim);color:var(--green)">LOW</span>
+      </div>
+      <div class="risk-track"><div class="risk-fill" id="risk-fill"></div></div>
+    </div>
+
+    <div class="sb-head" style="margin-top:.25rem">Sections Visited</div>
+    <div class="sec-list">
+      <div class="sec-row" id="rs-db">      <span class="si">🗃️</span>DB Config       <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-api">     <span class="si">🔑</span>API Keys        <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-access">  <span class="si">🔐</span>Access Logs     <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-users">   <span class="si">👥</span>User Records    <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-env">     <span class="si">🌐</span>Env Variables   <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-backup">  <span class="si">💾</span>Backup Status   <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-network"> <span class="si">📶</span>Network / Ports <span class="si-chk"></span></div>
+      <div class="sec-row" id="rs-terminal"><span class="si">💻</span>Live Terminal   <span class="si-chk"></span></div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN FEED -->
+  <div class="main">
+    <div class="feed-wrap">
+      <div class="panel-head">
+        <span>▶ REAL-TIME ACTIVITY FEED</span>
+        <div><span id="feed-count">0</span> EVENTS LOGGED</div>
+      </div>
+      <div class="feed-thead">
+        <div></div>
+        <div>TIMESTAMP</div>
+        <div>EVENT TYPE</div>
+        <div>ACTIVITY</div>
+        <div>FINGERPRINT</div>
+      </div>
+      <div class="feed-scroller" id="feed">
+        <div class="empty">
+          <span class="big">👁️</span>
+          Open <strong style="color:var(--green)">fake-page.html</strong> in a new tab —<br>
+          every sidebar click, scroll, section view,<br>
+          text selection and copy appears here live.<br><br>
+          <a href="fake-page.html" target="_blank">OPEN TRAP PAGE ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- .everything -->
+
+<!-- ── TOAST CONTAINER ── -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ── EMAIL SETTINGS PANEL ── -->
+<div class="settings-panel hidden" id="settings-panel">
+  <div class="sp-box">
+    <div class="sp-title">
+      📧 Email Alert Settings
+      <button class="sp-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="sp-field">
+      <label class="sp-label">EmailJS Public Key</label>
+      <input class="sp-input" id="ejs-pubkey" placeholder="user_xxxxxxxxxxxxxxxxx" autocomplete="off">
+      <div class="sp-hint">Get free from <a href="https://www.emailjs.com" target="_blank">emailjs.com</a> → Account → API Keys → Public Key</div>
+    </div>
+    <div class="sp-field">
+      <label class="sp-label">Service ID</label>
+      <input class="sp-input" id="ejs-service" placeholder="service_xxxxxxx" autocomplete="off">
+      <div class="sp-hint">EmailJS → Email Services → your service ID</div>
+    </div>
+    <div class="sp-field">
+      <label class="sp-label">Template ID</label>
+      <input class="sp-input" id="ejs-template" placeholder="template_xxxxxxx" autocomplete="off">
+      <div class="sp-hint">EmailJS → Email Templates → your template ID</div>
+    </div>
+    <div class="sp-field">
+      <label class="sp-label">Alert Email (To)</label>
+      <input class="sp-input" id="ejs-to" type="email" placeholder="your@email.com">
+      <div class="sp-hint">Where alert emails will be sent</div>
+    </div>
+    <div class="sp-field">
+      <label class="sp-label">Send Alert When</label>
+      <div class="sp-triggers">
+        <div class="sp-trigger">
+          <div class="sp-trigger-info">
+            <div class="sp-trigger-name">📋 Text is Copied</div>
+            <div class="sp-trigger-desc">Alert whenever visitor copies any data from the page</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="trig-copy" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="sp-trigger">
+          <div class="sp-trigger-info">
+            <div class="sp-trigger-name">👁️ Sensitive Section Viewed</div>
+            <div class="sp-trigger-desc">Alert when DB Config, API Keys, .env etc. are opened</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="trig-section" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="sp-trigger">
+          <div class="sp-trigger-info">
+            <div class="sp-trigger-name">🖱️ Sidebar Button Clicked</div>
+            <div class="sp-trigger-desc">Alert on every sidebar navigation click</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="trig-click"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="sp-trigger">
+          <div class="sp-trigger-info">
+            <div class="sp-trigger-name">🚪 Visitor Leaves Page</div>
+            <div class="sp-trigger-desc">Alert when visitor exits fake-page.html</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="trig-exit" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="sp-trigger">
+          <div class="sp-trigger-info">
+            <div class="sp-trigger-name">🌐 New Visitor Arrives</div>
+            <div class="sp-trigger-desc">Alert on every page visit</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="trig-visit"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="sp-row">
+      <button class="sp-btn save"   onclick="saveSettings()">SAVE SETTINGS</button>
+      <button class="sp-btn test"   onclick="testEmail()">SEND TEST</button>
+      <button class="sp-btn cancel" onclick="closeSettings()">CANCEL</button>
+    </div>
+    <div class="sp-status" id="sp-status"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const FAKE_KEY = 'fp_fake_logs';
+let lastCount=0, riskScore=0, totalEvents=0, totalClicks=0, totalCopies=0, totalSecs=0;
+let sectionsHit=new Set(), firstTs=null, feedInited=false, timerRunning=false;
+
+// Clock
+setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-IN',{hour12:true}).replace(/\b(am|pm)\b/i, m => m.toUpperCase()); },1000);
+
+// Risk engine
+const RISK = { visit:0, scroll:1, section:8, click:3, select:4, copy:20, time:10, exit:0 };
+function addRisk(pts){
+  riskScore = Math.min(riskScore+pts, 100);
+  set('s-risk', riskScore);
+  const fill=document.getElementById('risk-fill');
+  const tag=document.getElementById('risk-tag');
+  if(!fill||!tag) return;
+  fill.style.width=riskScore+'%';
+  let bg,color,label;
+  if(riskScore>=75)     { bg='var(--rdim)';color='var(--red)';  label='CRITICAL'; fill.style.background='var(--red)'; }
+  else if(riskScore>=50){ bg='var(--adim)';color='var(--amber)';label='HIGH';     fill.style.background='var(--amber)'; }
+  else if(riskScore>=25){ bg='var(--adim)';color='var(--amber)';label='MEDIUM';   fill.style.background='var(--amber)'; }
+  else                  { bg='var(--gdim)';color='var(--green)';label='LOW';      fill.style.background='var(--green)'; }
+  tag.style.background=bg; tag.style.color=color; tag.textContent=label;
+}
+
+// Section map
+const SEC = {
+  'DB Config':'rs-db','API Keys':'rs-api','Access Logs':'rs-access',
+  'User Records':'rs-users','Env Variables':'rs-env','Backup Status':'rs-backup',
+  'Network / Ports':'rs-network','Live Terminal':'rs-terminal',
+};
+
+function markSection(name, isClick){
+  const id=SEC[name]; if(!id) return;
+  const row=document.getElementById(id); if(!row) return;
+  const chk=row.querySelector('.si-chk');
+  if(isClick){
+    row.classList.remove('scrolled'); row.classList.add('clicked');
+    if(chk) chk.textContent='🖱️';
+  } else if(!row.classList.contains('clicked')){
+    row.classList.add('scrolled');
+    if(chk) chk.textContent='👁️';
+  }
+  if(!sectionsHit.has(name)){ sectionsHit.add(name); totalSecs++; set('c-secs',totalSecs); }
+}
+
+function findSection(text){
+  const checks=['DB Config','API Keys','Access Logs','User Records','Env Variables','Backup Status','Network / Ports','Live Terminal'];
+  for(const c of checks){ if(text.includes(c)) return c; }
+  return null;
+}
+
+// Badge + icon maps
+const BADGE_CLS  = { visit:'badge-visit', click:'badge-click', section:'badge-section', copy:'badge-copy', select:'badge-select', scroll:'badge-scroll', time:'badge-time', exit:'badge-exit' };
+const TYPE_LABEL = { visit:'VISIT', click:'CLICK', section:'SECTION', copy:'COPY', select:'SELECT', scroll:'SCROLL', time:'TIME', exit:'EXIT' };
+const ICONS      = { visit:'🌐', click:'🖱️', section:'👁️', copy:'📋', select:'✂️', scroll:'📜', time:'⏱️', exit:'🚪' };
+
+function buildItem(e){
+  const type=e.type||'visit';
+  const act =e.activity||'—';
+  const ts  =e.ts ? String(e.ts).split(',')[1]?.trim()||e.ts : '';
+
+  const html=act
+    .replace(/(Copied:|copied:)/g,'<span class="hr">$1</span>')
+    .replace(/(Selected text:)/g,'<span class="ha">$1</span>')
+    .replace(/(DB Config|API Keys|\.env|Env Variables|User Records|Terminal|Live Terminal|Backup Status|Network \/ Ports|Access Logs)/g,'<span class="ha">$1</span>')
+    .replace(/(Visited|Opened|visited|opened)/g,'<span class="hg">$1</span>');
+
+  const badge=`<span class="badge ${BADGE_CLS[type]||'badge-visit'}">${TYPE_LABEL[type]||type.toUpperCase()}</span>`;
+  const icon =ICONS[type]||'🌐';
+  const meta =[e.browser,e.os,e.tz,e.screen].filter(Boolean).join(' · ');
+
+  const div=document.createElement('div');
+  div.className='fi '+type;
+  div.innerHTML=`
+    <div class="fi-icon">${icon}</div>
+    <div class="fi-ts">${ts}</div>
+    <div>${badge}</div>
+    <div class="fi-act">${html}</div>
+    <div class="fi-meta">${meta}</div>`;
+  return div;
+}
+
+function processEntry(e, prepend){
+  const feed=document.getElementById('feed');
+  const empty=feed.querySelector('.empty'); if(empty) empty.remove();
+
+  const item=buildItem(e);
+  if(prepend) feed.insertBefore(item,feed.firstChild);
+  else        feed.appendChild(item);
+  while(feed.children.length>150) feed.removeChild(feed.lastChild);
+
+  totalEvents++;
+  set('s-total',totalEvents); set('c-total',totalEvents);
+  set('feed-count',feed.children.length);
+
+  const type=e.type||'visit';
+  if(type==='click'){ totalClicks++; set('s-clicks',totalClicks); set('c-clicks',totalClicks); }
+  if(type==='copy'){  totalCopies++; set('s-copies',totalCopies); set('c-copies',totalCopies); }
+  addRisk(RISK[type]||0);
+
+  if(e.browser) set('fp-browser',e.browser);
+  if(e.os)      set('fp-os',     e.os);
+  if(e.device)  set('fp-device', e.device);
+  if(e.screen)  set('fp-screen', e.screen);
+  if(e.tz)      set('fp-tz',     e.tz);
+  if(e.lang)    set('fp-lang',   e.lang);
+  if(e.ts)      set('fp-last',   String(e.ts).split(',')[1]?.trim()||e.ts);
+
+  if(!firstTs){ firstTs=Date.now(); startTimer(); }
+
+  const act=e.activity||'';
+  if(type==='click'  &&e.section) markSection(e.section,true);
+  if(type==='section'&&e.section) markSection(e.section,false);
+  const foundSec=findSection(act);
+  if(foundSec) markSection(foundSec,type==='click');
+
+  if(emailCfg.enabled&&emailCfg.triggers[type]) sendAlert(type,act,e);
+}
+
+function startTimer(){
+  if(timerRunning) return; timerRunning=true;
+  const t0=Date.now();
+  setInterval(()=>{
+    const s=Math.round((Date.now()-t0)/1000), m=Math.floor(s/60);
+    set('fp-timer', m>0?`${m}m ${s%60}s`:`${s}s`);
+  },1000);
+}
+
+function poll(){
+  try{
+    const raw=localStorage.getItem(FAKE_KEY); if(!raw) return;
+    const saved=JSON.parse(raw); if(!Array.isArray(saved)||!saved.length) return;
+    if(!feedInited){
+      feedInited=true;
+      [...saved].reverse().forEach(e=>processEntry(e,false));
+      lastCount=saved.length; return;
+    }
+    if(saved.length>lastCount){
+      saved.slice(0,saved.length-lastCount).reverse().forEach(e=>processEntry(e,true));
+      lastCount=saved.length;
+      document.getElementById('feed').scrollTop=0;
+    }
+  }catch(e){}
+}
+poll(); setInterval(poll,800);
+
+function clearAll(){
+  localStorage.removeItem(FAKE_KEY);
+  lastCount=0; feedInited=false; riskScore=0;
+  totalEvents=0; totalClicks=0; totalCopies=0; totalSecs=0;
+  sectionsHit.clear(); firstTs=null; timerRunning=false;
+  ['s-total','s-clicks','s-copies','s-risk','c-total','c-clicks','c-copies','c-secs'].forEach(id=>set(id,0));
+  ['fp-browser','fp-os','fp-device','fp-screen','fp-tz','fp-lang','fp-timer','fp-last'].forEach(id=>set(id,'—'));
+  set('feed-count',0);
+  document.getElementById('feed').innerHTML=`<div class="empty"><span class="big">🗑️</span>Cleared. Open the trap page again to begin.<br><br><a href="fake-page.html" target="_blank">OPEN TRAP PAGE ↗</a></div>`;
+  document.querySelectorAll('.sec-row').forEach(r=>{ r.classList.remove('scrolled','clicked'); r.querySelector('.si-chk').textContent=''; });
+  const fill=document.getElementById('risk-fill'), tag=document.getElementById('risk-tag');
+  if(fill){ fill.style.width='0'; fill.style.background='var(--green)'; }
+  if(tag){  tag.style.background='var(--gdim)'; tag.style.color='var(--green)'; tag.textContent='LOW'; }
+}
+
+// ── EMAIL ALERT SYSTEM ──
+const LS_EMAIL='hp_email_settings';
+let emailCfg={ pubkey:'',service:'',template:'',to:'',
+  triggers:{ copy:true, section:true, click:false, exit:true, visit:false },
+  enabled:false };
+
+(function loadEmailCfg(){
+  try{ const s=JSON.parse(localStorage.getItem(LS_EMAIL)||'null'); if(s){ emailCfg=s; applyTriggerUI(); updateEmailIndicator(); } }catch(e){}
+  if(emailCfg.pubkey) emailjs.init({ publicKey:emailCfg.pubkey });
+})();
+
+function applyTriggerUI(){
+  document.getElementById('ejs-pubkey').value   = emailCfg.pubkey   ||'';
+  document.getElementById('ejs-service').value  = emailCfg.service  ||'';
+  document.getElementById('ejs-template').value = emailCfg.template ||'';
+  document.getElementById('ejs-to').value       = emailCfg.to       ||'';
+  document.getElementById('trig-copy').checked    = !!emailCfg.triggers.copy;
+  document.getElementById('trig-section').checked = !!emailCfg.triggers.section;
+  document.getElementById('trig-click').checked   = !!emailCfg.triggers.click;
+  document.getElementById('trig-exit').checked    = !!emailCfg.triggers.exit;
+  document.getElementById('trig-visit').checked   = !!emailCfg.triggers.visit;
+}
+
+function updateEmailIndicator(){
+  const ind=document.getElementById('email-ind'), txt=document.getElementById('email-ind-txt');
+  if(!ind||!txt) return;
+  if(emailCfg.enabled&&emailCfg.to){ ind.classList.add('active'); txt.textContent='✉ ALERTS ON'; }
+  else{ ind.classList.remove('active'); txt.textContent='EMAIL ALERTS OFF'; }
+}
+
+function openSettings(){ applyTriggerUI(); document.getElementById('settings-panel').classList.remove('hidden'); }
+function closeSettings(){ document.getElementById('settings-panel').classList.add('hidden'); document.getElementById('sp-status').className='sp-status'; }
+
+function saveSettings(){
+  const pubkey=document.getElementById('ejs-pubkey').value.trim();
+  const service=document.getElementById('ejs-service').value.trim();
+  const template=document.getElementById('ejs-template').value.trim();
+  const to=document.getElementById('ejs-to').value.trim();
+  if(!pubkey||!service||!template||!to){ showSpStatus('err','Please fill in all fields before saving.'); return; }
+  emailCfg={ pubkey,service,template,to,
+    triggers:{ copy:document.getElementById('trig-copy').checked, section:document.getElementById('trig-section').checked,
+               click:document.getElementById('trig-click').checked, exit:document.getElementById('trig-exit').checked,
+               visit:document.getElementById('trig-visit').checked }, enabled:true };
+  localStorage.setItem(LS_EMAIL,JSON.stringify(emailCfg));
+  emailjs.init({ publicKey:pubkey });
+  updateEmailIndicator();
+  showSpStatus('ok','✅ Settings saved. Email alerts are now active.');
+  showToast('g','✉ EMAIL ALERTS ACTIVE','Alerts will be sent to '+to, 4000);
+}
+
+let emailQueue=Promise.resolve(), lastSentType={};
+function sendAlert(type,activity,entry){
+  if(!emailCfg.enabled||!emailCfg.to||!emailCfg.triggers[type]) return;
+  const now=Date.now(); if(lastSentType[type]&&now-lastSentType[type]<30000) return; lastSentType[type]=now;
+  const labels={ visit:'🌐 New Visitor', copy:'📋 Data Copied', section:'👁️ Sensitive Section Viewed',
+                 click:'🖱️ Sidebar Clicked', exit:'🚪 Visitor Left Page', select:'✂️ Text Selected', scroll:'📜 Page Scrolled', time:'⏱️ Extended Visit' };
+  const params={ to_email:emailCfg.to, alert_type:labels[type]||type.toUpperCase(), activity:activity||'—',
+    browser:entry.browser||'—', os:entry.os||'—', screen:entry.screen||'—', timezone:entry.tz||'—',
+    language:entry.lang||'—', device:entry.device||'—', timestamp:entry.ts||new Date().toLocaleString('en-IN').replace(/\b(am|pm)\b/i, m => m.toUpperCase()),
+    risk_score:riskScore+'/100', page_url:entry.page||'fake-page.html',
+    sections_viewed:[...sectionsHit].join(', ')||'None yet', total_events:totalEvents };
+  emailQueue=emailQueue.then(()=>
+    emailjs.send(emailCfg.service,emailCfg.template,params)
+      .then(()=>showToast('g','✉ ALERT SENT','Email dispatched → '+emailCfg.to,3500))
+      .catch(err=>showToast('r','✉ EMAIL FAILED',err?.text||String(err),5000))
+  );
+}
+
+function testEmail(){
+  const pubkey=document.getElementById('ejs-pubkey').value.trim();
+  const service=document.getElementById('ejs-service').value.trim();
+  const template=document.getElementById('ejs-template').value.trim();
+  const to=document.getElementById('ejs-to').value.trim();
+  if(!pubkey||!service||!template||!to){ showSpStatus('err','Fill in all fields first.'); return; }
+  showSpStatus('ok','⏳ Sending test email…');
+  emailjs.init({ publicKey:pubkey });
+  emailjs.send(service,template,{
+    to_email:to, alert_type:'🧪 TEST ALERT — AgriFarm Honeypot',
+    activity:'This is a test alert from your honeypot monitor.',
+    browser:navigator.userAgent.includes('Chrome')?'Chrome':'Browser',
+    os:navigator.userAgent.includes('Windows')?'Windows':'OS',
+    screen:screen.width+'×'+screen.height,
+    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
+    language:navigator.language, device:'Desktop',
+    timestamp:new Date().toLocaleString('en-IN').replace(/\b(am|pm)\b/i, m => m.toUpperCase()),
+    risk_score:'0/100', page_url:'fake-page.html',
+    sections_viewed:'N/A (test)', total_events:0,
+  }).then(()=>showSpStatus('ok','✅ Test email sent successfully!'))
+    .catch(err=>showSpStatus('err','❌ Failed: '+(err?.text||JSON.stringify(err))));
+}
+
+function showToast(cls,title,msg,duration=4000){
+  const wrap=document.getElementById('toast-wrap'); if(!wrap) return;
+  const t=document.createElement('div'); t.className='toast '+cls;
+  const icon=cls==='g'?'✅':cls==='r'?'❌':'⚠️';
+  t.innerHTML=`<div style="font-size:1rem;flex-shrink:0;margin-top:1px">${icon}</div>
+    <div class="toast-body"><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div>
+    <button class="toast-close" onclick="removeToast(this.parentElement)">✕</button>`;
+  wrap.appendChild(t); setTimeout(()=>removeToast(t),duration);
+}
+function removeToast(t){ if(!t||!t.parentElement) return; t.classList.add('out'); setTimeout(()=>t.remove(),300); }
+function showSpStatus(cls,msg){ const el=document.getElementById('sp-status'); if(!el) return; el.className='sp-status '+cls+' show'; el.textContent=msg; }
+function set(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+</script>
+</body>
+</html>

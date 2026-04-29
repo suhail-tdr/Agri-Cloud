@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agri Cloud™ Smart Farm Portal — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <div><span class="status-dot"></span><span class="status-live">SYSTEM ONLINE</span> — AGRI CLOUD SECURE PORTAL v2.1</div>
+  <div id="clock">--:--:--</div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span>NODE: AGRI-CLUSTER-07 | TLS 1.3 ACTIVE</span>
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()">🌙 NIGHT</button>
+  </div>
+</div>
+
+<div class="bg-ribbon"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+<div class="bg-particles" id="bg-particles"></div>
+<canvas id="farm-canvas"></canvas>
+
+<div class="container">
+
+  <!-- Logo -->
+  <div class="logo-section">
+    <div class="logo-icon">🌾</div>
+    <div class="logo-title">AGRI CLOUD™</div>
+    <div class="logo-sub">SMART FARM MANAGEMENT SYSTEM</div>
+    <div class="version-badge">v2.1.4 — PRODUCTION</div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+    <div class="card-header">
+      <span>SECURE ACCESS TERMINAL</span>
+      <span style="color:var(--green)">⬤ ONLINE</span>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Farm ID / User ID</div>
+      <input class="field-input" type="text" id="username" placeholder="ENTER YOUR ID" autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Access Key</div>
+      <input class="field-input" type="password" id="password" placeholder="••••••••••••" autocomplete="off">
+    </div>
+
+    <div class="field-row">
+      <label class="field-check">
+        <input type="checkbox"> KEEP SESSION ACTIVE
+      </label>
+      <a href="#" class="field-link">FORGOT KEY?</a>
+    </div>
+
+    <button class="login-btn" id="login-btn" onclick="attemptLogin()">▶ AUTHENTICATE ACCESS</button>
+    <div class="error-msg" id="error-msg">⛔ CREDENTIAL MISMATCH — ACCESS DENIED</div>
+
+    <div class="sys-info">
+      <div class="sys-row"><span>PORTAL</span><span class="sys-val">CROP MONITOR</span></div>
+      <div class="sys-row"><span>REGION</span><span class="sys-val">IN-KL-07</span></div>
+      <div class="sys-row"><span>SENSORS</span><span class="sys-val" id="sensor-count">247 ACTIVE</span></div>
+      <div class="sys-row"><span>UPTIME</span><span class="sys-val">99.97%</span></div>
+      <div class="sys-row"><span>PROTOCOL</span><span class="sys-val">TLS 1.3</span></div>
+      <div class="sys-row"><span>SESSION</span><span class="sys-val" id="session-id">--</span></div>
+    </div>
+
+    <div class="warn-box">
+      ⚠ AUTHORISED ACCESS ONLY — This system monitors critical agriculture infrastructure including irrigation control, soil sensors, and crop analytics. Unauthorised access attempts are logged, fingerprinted, and reported to the security team.
+    </div>
+  </div>
+
+
+
+</div>
+
+<!-- ACCESS DENIED Overlay -->
+<div class="denied-overlay" id="denied-overlay">
+  <div class="denied-icon">🚫</div>
+  <div class="denied-title">ACCESS BLOCKED</div>
+  <div class="denied-sub" id="denied-sub">MAX ATTEMPTS REACHED — SYSTEM LOCKED</div>
+  <div class="denied-log">
+    <div><span class="label">TIMESTAMP  : </span><span class="val" id="d-time">—</span></div>
+    <div><span class="label">USER INPUT : </span><span class="val" id="d-user">—</span></div>
+    <div><span class="label">BROWSER    : </span><span class="val" id="d-browser">—</span></div>
+    <div><span class="label">STATUS     : </span><span class="val">CREDENTIAL MISMATCH</span></div>
+    <div><span class="label">ACTION     : </span><span class="val">INCIDENT RECORDED ✓</span></div>
+    <div><span class="label">ALERT SENT : </span><span class="val">SECURITY TEAM NOTIFIED ✓</span></div>
+  </div>
+  <div class="redirect-bar">
+    CONNECTION WILL BE TERMINATED IN 5 SECONDS
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+<!-- ACCESS GRANTED Overlay -->
+<div class="success-overlay" id="success-overlay">
+  <div style="font-size:3.5rem;filter:drop-shadow(0 0 20px var(--green))">🌾</div>
+  <div class="success-title">ACCESS GRANTED</div>
+  <div class="success-sub">IDENTITY VERIFIED — LOADING FARM DASHBOARD</div>
+  <div class="success-log">
+    <div><span class="s-label">TIMESTAMP  : </span><span class="s-val" id="s-time">—</span></div>
+    <div><span class="s-label">USER       : </span><span class="s-val" id="s-user">—</span></div>
+    <div><span class="s-label">FARM ID    : </span><span class="s-val" id="s-farmid">AC-KL-2847</span></div>
+    <div><span class="s-label">CLEARANCE  : </span><span class="s-val">LEVEL 3 — FARM OWNER</span></div>
+    <div><span class="s-label">STATUS     : </span><span class="s-val">SESSION ESTABLISHED ✓</span></div>
+  </div>
+  <div class="success-bar">
+    REDIRECTING TO FARM DASHBOARD...
+    <div class="success-prog-bar"><div class="success-prog-fill" id="success-fill"></div></div>
+  </div>
+</div>
+
+<script src="js/honeypot.js"></script>
+<script>
+// ── CONFIG ───────────────────────────────────────────
+// Each user has a password, destination page, and full profile
+const VALID_USERS = {
+
+  "admin@dashboard": {
+    pass: "dashboard@admin", dest: "honeypot_dashboard.html",
+    name: "Dashboard", initials: "DA",
+    farmId: "AC-DASH-01",   district: "Internal",
+    area: "—",             plan: "Admin",
+    crops: "—",
+  },
+  "agri@admin": {
+    pass: "AgriAdmin@", dest: "server-data.html",
+    name: "Admin User",    initials: "AU",
+    farmId: "AC-ADMIN-01", district: "Kochi, Kerala",
+    area: "—",             plan: "Admin",
+    crops: "—",
+  },
+  "admin@monitor": {
+    pass: "Monitor@admin", dest: "honeypot_monitoring.html",
+    name: "Monitor Admin", initials: "MA",
+    farmId: "AC-MON-01",  district: "Internal",
+    area: "—",             plan: "Admin",
+    crops: "—",
+  },
+
+  "user":{
+    pass: "user@123", dest: "farm-details.html",
+    name: "User", initials: "U",
+    farmId: "AC-TEST-01", district: "Test District",
+    area: "0.0 ha", plan: "Test Plan",
+    crops: "Test Crops",
+  },
+    "farmer.rajan": {
+    pass: "Rajan@2024", dest: "farm-details.html",
+    name: "Rajan Pillai",   initials: "RP",
+    farmId: "AC-KL-2847",  district: "Tiruvalla, Kerala",
+    area: "14.5 ha",       plan: "Pro",
+    crops: "Rice, Coconut, Turmeric, Banana",
+  },
+  "krishna.farm": {
+    pass: "Paddy#Field9", dest: "farm-details.html",
+    name: "Krishna Menon",  initials: "KM",
+    farmId: "AC-KL-1134",  district: "Thrissur, Kerala",
+    area: "8.2 ha",        plan: "Basic",
+    crops: "Rice, Banana, Pepper",
+  },
+  "meera.grower": {
+    pass: "SoilSeed$7", dest: "farm-details.html",
+    name: "Meera Nair",     initials: "MN",
+    farmId: "AC-KL-3204",  district: "Palakkad, Kerala",
+    area: "6.0 ha",        plan: "Pro",
+    crops: "Vegetables, Turmeric, Coconut",
+  },
+  "thomas.agri": {
+    pass: "Keral@Farm3", dest: "farm-details.html",
+    name: "Thomas Varghese", initials: "TV",
+    farmId: "AC-KL-0441",  district: "Kottayam, Kerala",
+    area: "11.0 ha",       plan: "Pro",
+    crops: "Rubber, Rice",
+  },
+  "lakshmi.farmer": {
+    pass: "GreenLeaf#5", dest: "farm-details.html",
+    name: "Lakshmi Devi", initials: "LD",
+    farmId: "AC-KL-2210",  district: "Ernakulam, Kerala",
+    area: "4.5 ha",        plan: "Basic",
+    crops: "Vegetables, Flowers",
+  },
+};
+
+// Honeypot credentials — first attempt: show error, subsequent: fake-page.html
+const HONEYPOT_CREDS = [
+  { u: "admin",     p: "admin"    },
+  { u: "admin",     p: "123456"   },
+  { u: "admin",     p: "password" },
+  { u: "admin123",  p: "admin123" },
+  { u: "root",      p: "root"     },
+  { u: "root",      p: "admin"    },
+];
+
+// SQL injection patterns
+const SQL_PATTERNS = [
+  /'\s*or\s*'1'\s*=\s*'1/i,
+  /'\s*or\s+1\s*=\s*1/i,
+  /--\s/,
+  /;\s*drop\s+table/i,
+  /union\s+select/i,
+  /'\s*;\s*/i,
+  /1\s*=\s*1/i,
+];
+
+// ── COUNTERS ─────────────────────────────────────────
+let visits        = parseInt(localStorage.getItem('hp_visits')   || '0');
+let attempts      = parseInt(localStorage.getItem('hp_attempts') || '0');
+let denied        = parseInt(localStorage.getItem('hp_denied')   || '0');
+let failedAttempts = 0;
+
+// Track honeypot warnings per credential combo this session
+const honeypotWarned = new Set();
+
+function isHoneypot(user, pass) {
+  return HONEYPOT_CREDS.some(c =>
+    c.u.toLowerCase() === user.toLowerCase() && c.p === pass
+  );
+}
+
+function isSQLInjection(user, pass) {
+  return SQL_PATTERNS.some(p => p.test(user) || p.test(pass));
+}
+
+function redirectToFake(reason, user) {
+  saveLog({ event: 'HONEYPOT_REDIRECT', reason, ts: new Date().toISOString(), user, ua: navigator.userAgent });
+  setTimeout(() => { window.location.href = 'fake-page.html'; }, 1200);
+}
+
+// ── CLOCK ─────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-GB', { hour12: true }).replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── DARK MODE ─────────────────────────────────────────
+function toggleDark() {
+  const dark = document.body.classList.toggle('dark-mode');
+  document.getElementById('dark-toggle').textContent = dark ? '☀ DAY' : '🌙 NIGHT';
+  localStorage.setItem('agri_dark', dark ? '1' : '0');
+}
+if (localStorage.getItem('agri_dark') === '1') toggleDark();
+
+document.getElementById('session-id').textContent =
+  'SES-' + Math.random().toString(36).substr(2,8).toUpperCase();
+
+// ── SENSOR COUNT FLICKER ──────────────────────────────
+setInterval(() => {
+  const base = 247;
+  document.getElementById('sensor-count').textContent =
+    (base + Math.floor((Math.random()-0.5)*4)) + ' ACTIVE';
+}, 5000);
+
+// ── PAGE VISIT LOG ────────────────────────────────────
+(function logVisit() {
+  visits++;
+  localStorage.setItem('hp_visits', visits);
+  saveLog({ event:'PAGE_VISIT', ts: new Date().toISOString(), ua: navigator.userAgent });
+})();
+
+function saveLog(entry) {
+  const all = JSON.parse(localStorage.getItem('honeypot_logs') || '[]');
+  all.unshift(Object.assign({ id: Date.now() }, entry));
+  if (all.length > 200) all.pop();
+  localStorage.setItem('honeypot_logs', JSON.stringify(all));
+}
+
+function addTicker() {} // stub (ticker removed)
+
+function findUserByLoginId(loginId) {
+  if (!loginId) return null;
+
+  const directRecord = VALID_USERS[loginId];
+  if (directRecord) {
+    return { username: loginId, record: directRecord };
+  }
+
+  const lookup = loginId.toLowerCase();
+  for (const [username, record] of Object.entries(VALID_USERS)) {
+    if (String(record.farmId || '').toLowerCase() === lookup) {
+      return { username, record };
+    }
+  }
+
+  return null;
+}
+
+// ── LOGIN FUNCTION ────────────────────────────────────
+function attemptLogin() {
+  const rawUser = document.getElementById('username').value.trim();
+  const rawPass = document.getElementById('password').value;
+  const user    = rawUser || 'ANONYMOUS';
+  const btn     = document.getElementById('login-btn');
+  const errEl   = document.getElementById('error-msg');
+
+  const origText = btn.textContent;
+  btn.classList.add('loading');
+  btn.textContent = '';
+  errEl.style.display = 'none';
+
+  attempts++;
+  localStorage.setItem('hp_attempts', attempts);
+  saveLog({ event:'LOGIN_ATTEMPT', ts: new Date().toISOString(), user, ua: navigator.userAgent });
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.textContent = origText;
+
+    // ── 1. SQL INJECTION DETECTION ───────────────────
+    if (isSQLInjection(rawUser, rawPass)) {
+      saveLog({ event:'SQL_INJECTION_DETECTED', ts: new Date().toISOString(), user, ua: navigator.userAgent });
+      errEl.textContent = '⛔ CREDENTIAL MISMATCH — ACCESS DENIED';
+      errEl.style.display = 'block';
+      flashRed();
+      redirectToFake('SQL_INJECTION', user);
+      return;
+    }
+
+    // ── 2. VALID USER CHECK (USERNAME OR FARM ID) ────
+    const match = findUserByLoginId(rawUser);
+    const record = match ? match.record : null;
+    const resolvedUsername = match ? match.username : rawUser;
+    if (record && record.pass === rawPass) {
+      saveLog({ event:'LOGIN_SUCCESS', ts: new Date().toISOString(), user });
+
+      // ── SAVE SESSION ─────────────────────────────────
+      const session = {
+        username:  resolvedUsername,
+        name:      record.name,
+        initials:  record.initials,
+        farmId:    record.farmId,
+        district:  record.district,
+        area:      record.area,
+        plan:      record.plan,
+        crops:     record.crops,
+        loginTime: new Date().toISOString(),
+      };
+      sessionStorage.setItem('agri_session', JSON.stringify(session));
+
+      const overlay = document.getElementById('success-overlay');
+      overlay.classList.add('show');
+      document.getElementById('s-time').textContent = new Date().toLocaleString('en-GB').replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+      document.getElementById('s-user').textContent = record.name.toUpperCase();
+
+      // Update success overlay farm id line dynamically
+      const farmIdEl = document.getElementById('s-farmid');
+      if (farmIdEl) farmIdEl.textContent = record.farmId;
+
+      const fill = document.getElementById('success-fill');
+      fill.style.transition = 'width 2s linear';
+      setTimeout(() => { fill.style.width = '100%'; }, 50);
+      setTimeout(() => { window.location.href = record.dest; }, 2200);
+      return;
+    }
+
+    // ── 3. HONEYPOT CREDENTIAL CHECK ────────────────
+    if (isHoneypot(rawUser, rawPass)) {
+      const key = rawUser.toLowerCase() + '::' + rawPass;
+      denied++;
+      localStorage.setItem('hp_denied', denied);
+      saveLog({ event:'HONEYPOT_HIT', ts: new Date().toISOString(), user, ua: navigator.userAgent });
+
+      if (!honeypotWarned.has(key)) {
+        // First attempt — just show the error
+        honeypotWarned.add(key);
+        errEl.textContent = '⛔ CREDENTIAL MISMATCH — ACCESS DENIED';
+        errEl.style.display = 'block';
+        flashRed();
+      } else {
+        // Repeat attempt — silently funnel to fake page
+        errEl.textContent = '⛔ CREDENTIAL MISMATCH — ACCESS DENIED';
+        errEl.style.display = 'block';
+        flashRed();
+        redirectToFake('HONEYPOT_REPEAT', user);
+      }
+      document.getElementById('password').value = '';
+      return;
+    }
+
+    // ── 4. GENERIC FAIL ──────────────────────────────
+    failedAttempts++;
+    denied++;
+    localStorage.setItem('hp_denied', denied);
+    saveLog({ event:'ACCESS_DENIED', ts: new Date().toISOString(), user, ua: navigator.userAgent });
+
+    errEl.textContent = '⛔ CREDENTIAL MISMATCH — ACCESS DENIED';
+    errEl.style.display = 'block';
+    flashRed();
+    document.getElementById('password').value = '';
+
+    if (failedAttempts >= 3) {
+      const overlay = document.getElementById('denied-overlay');
+      overlay.classList.add('show');
+      document.getElementById('d-time').textContent = new Date().toLocaleString('en-GB').replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+      document.getElementById('d-user').textContent = user.toUpperCase();
+      document.getElementById('d-browser').textContent = navigator.userAgent.split(' ').slice(-2).join(' ');
+
+      btn.disabled = true;
+
+      const fill = document.getElementById('prog-fill');
+      fill.style.animation = 'none'; fill.offsetHeight;
+      fill.style.animation = 'fillBar 5s linear forwards';
+
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        failedAttempts = 0;
+        btn.disabled = false;
+        document.getElementById('session-id').textContent =
+          'SES-' + Math.random().toString(36).substr(2,8).toUpperCase();
+      }, 5000);
+    }
+  }, 900);
+}
+
+function flashRed() {
+  const u = document.getElementById('username');
+  const p = document.getElementById('password');
+  u.style.borderColor = 'var(--red)';
+  p.style.borderColor = 'var(--red)';
+  setTimeout(() => { u.style.borderColor = ''; p.style.borderColor = ''; }, 1500);
+}
+
+
+// ── ENTER KEY ─────────────────────────────────────────
+document.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+(function() {
+  const canvas = document.getElementById('farm-canvas');
+  const ctx = canvas.getContext('2d');
+  const particleHost = document.getElementById('bg-particles');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── FLOATING LIGHT PARTICLES ───────────────────────────
+  const particles = [];
+  const PARTICLE_COUNT = 26;
+  if (particleHost) {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const p = document.createElement('span');
+      p.className = 'bg-particle';
+      const size = 2 + Math.random() * 4;
+      const left = Math.random() * 100;
+      const top = 12 + Math.random() * 78;
+      const duration = 10 + Math.random() * 16;
+      const delay = -Math.random() * duration;
+      p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;top:${top}%;animation-duration:${duration}s;animation-delay:${delay}s;`;
+      particleHost.appendChild(p);
+      particles.push({ x: left, y: top, drift: 0.2 + Math.random() * 0.6, rise: 0.3 + Math.random() * 0.7 });
+    }
+  }
+
+  // ── WHEAT STALKS ──────────────────────────────────────
+  const stalks = [];
+  const STALK_COUNT = 60;
+  for (let i = 0; i < STALK_COUNT; i++) {
+    stalks.push({
+      x: Math.random() * window.innerWidth,
+      baseY: window.innerHeight * (0.62 + Math.random() * 0.38),
+      height: 40 + Math.random() * 50,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.4 + Math.random() * 0.6,
+      thickness: 1.5 + Math.random() * 1.5,
+      color: `hsl(${40 + Math.random()*20}, ${60+Math.random()*20}%, ${45+Math.random()*15}%)`,
+    });
+  }
+
+  // ── BIRDS ─────────────────────────────────────────────
+  const birds = [];
+  for (let i = 0; i < 8; i++) {
+    birds.push({
+      x: Math.random() * window.innerWidth,
+      y: window.innerHeight * (0.05 + Math.random() * 0.2),
+      vx: 0.5 + Math.random() * 1.2,
+      vy: (Math.random() - 0.5) * 0.3,
+      wingPhase: Math.random() * Math.PI * 2,
+      scale: 0.6 + Math.random() * 0.7,
+    });
+  }
+
+  // ── BUTTERFLIES ───────────────────────────────────────
+  const butterflies = [];
+  for (let i = 0; i < 5; i++) {
+    butterflies.push({
+      x: Math.random() * window.innerWidth,
+      y: window.innerHeight * (0.45 + Math.random() * 0.25),
+      vx: (Math.random() - 0.5) * 1.2,
+      vy: (Math.random() - 0.5) * 0.8,
+      phase: Math.random() * Math.PI * 2,
+      color: ['#f97316','#ec4899','#a855f7','#eab308','#06b6d4'][i],
+      scale: 0.8 + Math.random() * 0.5,
+      timer: 0,
+    });
+  }
+
+  // ── DRAW BIRD ─────────────────────────────────────────
+  function drawBird(x, y, wingPhase, scale) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.strokeStyle = 'rgba(40,20,5,0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    const flap = Math.sin(wingPhase) * 6;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-8, -flap, -16, 0);
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(8, -flap, 16, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── DRAW BUTTERFLY ────────────────────────────────────
+  function drawButterfly(x, y, phase, color, scale) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    const flap = Math.sin(phase) * 0.8 + 0.2;
+    ctx.globalAlpha = 0.85;
+    // left wings
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(-5 * flap, -3, 7 * flap, 5, -Math.PI/4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-4 * flap, 3, 5 * flap, 4, Math.PI/4, 0, Math.PI*2);
+    ctx.fill();
+    // right wings
+    ctx.beginPath();
+    ctx.ellipse(5 * flap, -3, 7 * flap, 5, Math.PI+Math.PI/4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(4 * flap, 3, 5 * flap, 4, Math.PI-Math.PI/4, 0, Math.PI*2);
+    ctx.fill();
+    // body
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(30,10,0,0.6)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 1.5, 5, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ── DRAW WHEAT STALK ──────────────────────────────────
+  function drawStalk(stalk, t) {
+    const sway = Math.sin(t * stalk.speed + stalk.phase) * 6;
+    const x = stalk.x, y = stalk.baseY;
+    const topX = x + sway, topY = y - stalk.height;
+    ctx.save();
+    ctx.strokeStyle = stalk.color;
+    ctx.lineWidth = stalk.thickness;
+    ctx.lineCap = 'round';
+    // stem
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + sway * 0.5, y - stalk.height * 0.5, topX, topY);
+    ctx.stroke();
+    // grain head
+    ctx.fillStyle = stalk.color;
+    ctx.beginPath();
+    ctx.ellipse(topX, topY - 6, 2.5, 8, Math.atan2(sway, stalk.height * 0.3), 0, Math.PI*2);
+    ctx.fill();
+    // side grain wisps
+    for (let side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(topX, topY);
+      ctx.lineTo(topX + side * 5, topY - 3);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ── DRAW FENCE ────────────────────────────────────────
+  function drawFence() {
+    const groundY = canvas.height * 0.63;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(100,60,20,0.55)';
+    ctx.lineWidth = 2.5;
+    // horizontal rails
+    ctx.beginPath();
+    ctx.moveTo(0, groundY - 5); ctx.lineTo(canvas.width, groundY - 5);
+    ctx.moveTo(0, groundY - 18); ctx.lineTo(canvas.width, groundY - 18);
+    ctx.stroke();
+    // posts
+    ctx.lineWidth = 4;
+    for (let fx = 0; fx < canvas.width; fx += 90) {
+      ctx.beginPath();
+      ctx.moveTo(fx, groundY + 5);
+      ctx.lineTo(fx, groundY - 25);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ── MAIN LOOP ─────────────────────────────────────────
+  let t = 0;
+  function draw() {
+    t += 0.016;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Soft atmospheric haze
+    const haze = ctx.createRadialGradient(canvas.width * 0.5, canvas.height * 0.28, 50, canvas.width * 0.5, canvas.height * 0.28, canvas.width * 0.6);
+    haze.addColorStop(0, 'rgba(255,255,255,0.12)');
+    haze.addColorStop(0.45, 'rgba(255,255,255,0.05)');
+    haze.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Sun rays sweeping through the sky
+    ctx.save();
+    ctx.globalAlpha = 0.14;
+    const rayGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height * 0.45);
+    rayGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    rayGrad.addColorStop(0.5, 'rgba(255,255,255,0.16)');
+    rayGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rayGrad;
+    for (let i = 0; i < 3; i++) {
+      const offset = Math.sin(t * 0.35 + i) * 60;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.06 + offset, canvas.height * 0.04);
+      ctx.lineTo(canvas.width * 0.36 + offset, canvas.height * 0.46);
+      ctx.lineTo(canvas.width * 0.30 + offset, canvas.height * 0.46);
+      ctx.lineTo(canvas.width * 0.0 + offset, canvas.height * 0.04);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Ground stripe
+    const grd = ctx.createLinearGradient(0, canvas.height * 0.6, 0, canvas.height);
+    grd.addColorStop(0, 'rgba(90,140,40,0.25)');
+    grd.addColorStop(1, 'rgba(45,80,16,0.12)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, canvas.height * 0.6, canvas.width, canvas.height * 0.4);
+
+    // Fence
+    drawFence();
+
+    // Wheat
+    stalks.forEach(s => drawStalk(s, t));
+
+    // Birds
+    birds.forEach(b => {
+      b.wingPhase += 0.12;
+      b.x += b.vx;
+      b.y += b.vy + Math.sin(t * 0.5 + b.wingPhase * 0.1) * 0.2;
+      if (b.x > canvas.width + 30) { b.x = -30; b.y = canvas.height * (0.05 + Math.random() * 0.2); }
+      drawBird(b.x, b.y, b.wingPhase, b.scale);
+    });
+
+    // Butterflies
+    butterflies.forEach(bf => {
+      bf.phase += 0.1;
+      bf.timer += 0.016;
+      // gentle drift with occasional direction change
+      if (bf.timer > 2 + Math.random() * 2) {
+        bf.vx = (Math.random() - 0.5) * 1.5;
+        bf.vy = (Math.random() - 0.5) * 1.0;
+        bf.timer = 0;
+      }
+      bf.x += bf.vx;
+      bf.y += bf.vy + Math.sin(bf.phase * 0.5) * 0.3;
+      // bounce off edges
+      if (bf.x < 10 || bf.x > canvas.width - 10) bf.vx *= -1;
+      if (bf.y < canvas.height * 0.3 || bf.y > canvas.height * 0.75) bf.vy *= -1;
+      drawButterfly(bf.x, bf.y, bf.phase, bf.color, bf.scale);
+    });
+
+    // Light pollen motes drifting upward
+    particles.forEach((pt, index) => {
+      pt.x += Math.sin(t * pt.drift + index) * 0.15;
+      pt.y -= pt.rise;
+      if (pt.y < -5) {
+        pt.y = 102 + Math.random() * 8;
+        pt.x = Math.random() * 100;
+      }
+      const px = (pt.x / 100) * canvas.width;
+      const py = (pt.y / 100) * canvas.height;
+      ctx.save();
+      ctx.globalAlpha = 0.4 + Math.sin(t * 2 + index) * 0.15;
+      ctx.fillStyle = index % 3 === 0 ? 'rgba(255,245,200,0.95)' : 'rgba(255,255,255,0.85)';
+      ctx.beginPath();
+      ctx.arc(px, py, 0.9 + (index % 4) * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agri Cloud — Farm Details</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/farm-details.css">
+</head>
+<body>
+<div class="dash-layout">
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<aside class="dash-sidebar" id="dashSidebar">
+  <div class="dash-sidebar-logo">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-leaf">🌿</span>
+      <span class="logo-text">Agri <span>Cloud</span></span>
+    </a>
+  </div>
+  <nav class="dash-nav">
+    <div class="dash-nav-section">OVERVIEW</div>
+    <button class="dash-nav-item active" onclick="show('overview',this)"><span class="nav-icon">📊</span> Farm Dashboard</button>
+    <button class="dash-nav-item" onclick="show('crops',this)"><span class="nav-icon">🌾</span> Crop Details</button>
+    <button class="dash-nav-item" onclick="show('sensors',this)"><span class="nav-icon">📡</span> IoT Sensors</button>
+    <div class="dash-nav-section">MANAGEMENT</div>
+    <button class="dash-nav-item" onclick="show('irrigation',this)"><span class="nav-icon">🚿</span> Irrigation Control</button>
+    <button class="dash-nav-item" onclick="show('satellite',this)"><span class="nav-icon">🛰️</span> Satellite Maps</button>
+    <button class="dash-nav-item" onclick="show('soil',this)"><span class="nav-icon">🧪</span> Soil Reports</button>
+    <button class="dash-nav-item" onclick="show('pest',this)"><span class="nav-icon">💊</span> Pest & Disease<span class="nav-badge">2</span></button>
+    <button class="dash-nav-item" onclick="show('inventory',this)"><span class="nav-icon">📦</span> Inventory</button>
+    <div class="dash-nav-section">INTELLIGENCE</div>
+    <button class="dash-nav-item" onclick="show('market',this)"><span class="nav-icon">📈</span> Market Prices</button>
+    <button class="dash-nav-item" onclick="show('weather',this)"><span class="nav-icon">☁️</span> Weather</button>
+    <button class="dash-nav-item" onclick="show('ai',this)"><span class="nav-icon">🤖</span> AI Advisor</button>
+    <div class="dash-nav-section">SYSTEM</div>
+    <button class="dash-nav-item" onclick="show('logs',this)"><span class="nav-icon">📋</span> Activity Logs</button>
+    <button class="dash-nav-item" onclick="show('settings',this)"><span class="nav-icon">⚙️</span> Settings</button>
+  </nav>
+  <div class="dash-sidebar-footer">
+    <div class="dash-user">
+      <div class="dash-avatar" id="sb-avatar">SK</div>
+      <div class="dash-user-info">
+        <div class="dash-user-name" id="sb-name">Suresh Kumar</div>
+        <div class="dash-user-role" id="sb-role">Farm Owner · Pro Plan</div>
+      </div>
+      <button class="dash-logout" onclick="location.href='index.html'" title="Logout">⏻</button>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════ -->
+<div class="dash-main">
+  <!-- TOPBAR -->
+  <div class="dash-topbar">
+    <button id="menuBtn" style="background:none;border:none;font-size:1.3rem;cursor:pointer;display:none;margin-right:0.5rem" onclick="toggleSidebarMenu(event)">☰</button>
+    <div class="dash-page-title" id="pageTitle">Farm Dashboard
+      <span style="font-size:0.72rem;font-weight:400;color:var(--text-muted);margin-left:0.5rem">Farm ID: <span id="hdr-farmid">AC-KL-2847</span> · <span id="hdr-area">14.5 ha</span> · Kharif 2024</span>
+    </div>
+    <div class="dash-topbar-actions">
+      <button id="themeToggle" class="theme-toggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">🌙 Dark</button>
+      <span style="font-size:0.78rem;color:var(--text-muted)">Synced: <span style="color:var(--green);font-weight:600" id="sync-time">2 min ago</span></span>
+      <button class="dash-notif-btn">🔔<span class="dash-notif-badge"></span></button>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem">
+        <div class="dash-avatar" id="tb-avatar" style="width:30px;height:30px;font-size:0.75rem">SK</div>
+        <span id="tb-firstname">Suresh</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-content">
+
+<!-- ════════════════════════════════════════
+     1. OVERVIEW
+════════════════════════════════════════ -->
+<div id="sec-overview" class="page-section active">
+  <!-- Alert banner -->
+  <div style="background:var(--amber-light);border:1px solid #fcd34d;border-left:4px solid var(--amber);border-radius:var(--radius);padding:0.9rem 1.25rem;display:flex;align-items:center;gap:0.75rem;margin-bottom:1.75rem;font-size:0.88rem">
+    ⚠️<div><strong style="color:var(--amber)">Irrigation Alert:</strong> Field 3 (Coconut) soil moisture 34%, below threshold. Drip scheduled 06:00 AM.
+    <a href="#" onclick="show('irrigation',null)" style="color:var(--green);font-weight:600;margin-left:8px">View →</a></div>
+  </div>
+  <!-- KPI Stats -->
+  <div class="dash-stats">
+    <div class="dstat"><div class="dstat-label">Health Score</div><div class="dstat-num" style="color:var(--green)" id="ov-health">87/100</div><div class="dstat-sub">↑ 4pts from last week</div><div class="dstat-icon">💚</div></div>
+    <div class="dstat amber"><div class="dstat-label">Water Usage Today</div><div class="dstat-num" id="ov-water">4,820 L</div><div class="dstat-sub">↑ 12% vs avg (heat)</div><div class="dstat-icon">💧</div></div>
+    <div class="dstat"><div class="dstat-label">Active Crops</div><div class="dstat-num">6<span style="font-size:1rem;color:var(--text-muted)">/8</span></div><div class="dstat-sub">2 fields fallow</div><div class="dstat-icon">🌾</div></div>
+    <div class="dstat blue"><div class="dstat-label">Est. Harvest Value</div><div class="dstat-num">₹4.2L</div><div class="dstat-sub">Next 45 days · 6 crops</div><div class="dstat-icon">📈</div></div>
+  </div>
+  <div class="dash-grid2">
+    <!-- Live sensors -->
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📡 Live Sensors</h3><span class="tag-g">● 12 online</span></div>
+      <div class="dash-card-body">
+        <div class="sensor-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="sensor-item"><div class="sensor-icon">🌡️</div><div class="sensor-val" id="ov-temp">29.1°C</div><div class="sensor-label">Air Temp</div></div>
+          <div class="sensor-item"><div class="sensor-icon">💧</div><div class="sensor-val" id="ov-hum">68%</div><div class="sensor-label">Humidity</div></div>
+          <div class="sensor-item"><div class="sensor-icon">🌱</div><div class="sensor-val" id="ov-soil">58%</div><div class="sensor-label">Soil Moisture</div></div>
+          <div class="sensor-item"><div class="sensor-icon">⚗️</div><div class="sensor-val">6.7</div><div class="sensor-label">Soil pH</div></div>
+          <div class="sensor-item"><div class="sensor-icon">🌬️</div><div class="sensor-val" id="ov-wind">14 km/h</div><div class="sensor-label">Wind</div></div>
+          <div class="sensor-item"><div class="sensor-icon">☀️</div><div class="sensor-val" id="ov-light">7.8k lux</div><div class="sensor-label">Light</div></div>
+          <div class="sensor-item"><div class="sensor-icon">🌧️</div><div class="sensor-val">1.8mm</div><div class="sensor-label">Rainfall</div></div>
+          <div class="sensor-item"><div class="sensor-icon">🌿</div><div class="sensor-val">820ppm</div><div class="sensor-label">CO₂</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- 7-day chart -->
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📈 Soil Moisture — 7 Days</h3><span style="font-size:0.75rem;color:var(--text-muted)">Fields 1–3</span></div>
+      <div class="dash-card-body"><div class="canvas-wrap"><canvas id="ov-chart" height="140"></canvas></div></div>
+    </div>
+  </div>
+  <div class="dash-grid2">
+    <!-- Alerts feed -->
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🔔 Recent Alerts</h3><a href="#" onclick="show('logs',null)" style="font-size:0.78rem;color:var(--green);font-weight:600">All logs →</a></div>
+      <div class="dash-card-body">
+        <div class="alert-feed">
+          <div class="alert-item warning"><div class="alert-icon">💧</div><div class="alert-body"><div class="alert-title">Drip triggered — Field 1 Zone A</div><div class="alert-time">Today 05:30 AM · Auto threshold</div></div></div>
+          <div class="alert-item critical"><div class="alert-icon">🤖</div><div class="alert-body"><div class="alert-title">AI: Leaf blight — Field 6 (Banana) 84% confidence</div><div class="alert-time">Yesterday 02:14 PM</div></div></div>
+          <div class="alert-item"><div class="alert-icon">🛰️</div><div class="alert-body"><div class="alert-title">NDVI satellite pass completed — 14.5 ha</div><div class="alert-time">2 days ago · ISRO ResourceSat-2A</div></div></div>
+          <div class="alert-item critical"><div class="alert-icon">🔒</div><div class="alert-body"><div class="alert-title">Login from unknown IP 45.76.184.32 (NL) — <span style="color:var(--red)">FLAGGED</span></div><div class="alert-time">4 days ago · Security system</div></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Quick market + weather -->
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📊 Quick Snapshot</h3></div>
+      <div class="dash-card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div style="text-align:center;background:var(--bg-alt);padding:1rem;border-radius:10px">
+            <div style="font-size:1.8rem">⛅</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;font-weight:700">31°C</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">Partly Cloudy</div>
+          </div>
+          <div style="background:var(--bg-alt);padding:1rem;border-radius:10px">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:0.5rem">Top Prices</div>
+            <div style="font-size:0.82rem;margin-bottom:0.3rem">🌾 Rice <strong style="float:right;color:var(--green)">₹2,180</strong></div>
+            <div style="font-size:0.82rem;margin-bottom:0.3rem">🌿 Turmeric <strong style="float:right;color:var(--green)">₹14,200</strong></div>
+            <div style="font-size:0.82rem">🍌 Banana <strong style="float:right;color:var(--red)">₹3,400</strong></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;font-size:0.8rem">
+          <div style="background:var(--green-pale);padding:0.6rem;border-radius:8px;text-align:center"><strong style="color:var(--green);font-size:1.1rem">6</strong><br><span style="color:var(--text-muted)">Active Crops</span></div>
+          <div style="background:var(--amber-light);padding:0.6rem;border-radius:8px;text-align:center"><strong style="color:var(--amber);font-size:1.1rem">2</strong><br><span style="color:var(--text-muted)">Alerts</span></div>
+          <div style="background:#e0f2fe;padding:0.6rem;border-radius:8px;text-align:center"><strong style="color:var(--blue);font-size:1.1rem">12</strong><br><span style="color:var(--text-muted)">Sensors</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     2. CROP DETAILS
+════════════════════════════════════════ -->
+<div id="sec-crops" class="page-section">
+  <div class="sec-h">Crop Details</div>
+  <div class="sec-s">Kharif 2024 · 6 active crops · Farm <span id="crop-farmid">AC-KL-2847</span> · <span id="crop-area">14.5 ha</span> total</div>
+  <div class="dash-stats">
+    <div class="dstat"><div class="dstat-label">Total Crop Area</div><div class="dstat-num">12.5 ha</div><div class="dstat-sub">2 ha fallow</div><div class="dstat-icon">🗺️</div></div>
+    <div class="dstat"><div class="dstat-label">Avg Health</div><div class="dstat-num" style="color:var(--green)">83/100</div><div class="dstat-sub">Good overall</div><div class="dstat-icon">💚</div></div>
+    <div class="dstat amber"><div class="dstat-label">At-Risk Crops</div><div class="dstat-num">2</div><div class="dstat-sub">Banana, Shallots</div><div class="dstat-icon">⚠️</div></div>
+    <div class="dstat blue"><div class="dstat-label">Next Harvest</div><div class="dstat-num">22d</div><div class="dstat-sub">Leafy Veg — Field 5</div><div class="dstat-icon">🗓️</div></div>
+  </div>
+  <div class="dash-card" style="margin-bottom:1.5rem">
+    <div class="dash-card-head"><h3>🌾 All Crops — Full Status</h3></div>
+    <div class="dash-card-body" style="padding:0">
+      <table class="threat-table" style="width:100%">
+        <thead><tr><th>Crop</th><th>Field</th><th>Area</th><th>Stage</th><th>Harvest</th><th>Yield Est.</th><th>Health</th><th>Water</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>🌾 Rice (Kuruvai)</strong></td><td>F1, F2</td><td>4.0 ha</td><td>Tillering</td><td>38 days</td><td>4.2 t/ha</td><td style="color:var(--green);font-weight:700">91/100</td><td><span class="tag-a">HIGH</span></td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Healthy</span></td></tr>
+          <tr><td><strong>🥥 Coconut</strong></td><td>F3</td><td>2.5 ha</td><td>Fruiting</td><td>65 days</td><td>85 nuts/tree</td><td style="color:var(--amber);font-weight:700">72/100</td><td><span class="tag-r">CRITICAL</span></td><td><span class="tbadge tbadge-attempt">⚠ Dry stress</span></td></tr>
+          <tr><td><strong>🌿 Turmeric</strong></td><td>F4</td><td>1.8 ha</td><td>Rhizome dev.</td><td>90 days</td><td>22 t/ha</td><td style="color:var(--green);font-weight:700">88/100</td><td><span class="tag-a">MEDIUM</span></td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Healthy</span></td></tr>
+          <tr><td><strong>🥬 Leafy Veg</strong></td><td>F5</td><td>0.8 ha</td><td>Vegetative</td><td>22 days</td><td>18 t/ha</td><td style="color:var(--green);font-weight:700">94/100</td><td><span class="tag-g">LOW</span></td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Healthy</span></td></tr>
+          <tr><td><strong>🍌 Banana (Nendran)</strong></td><td>F6</td><td>1.6 ha</td><td>Bunch dev.</td><td>50 days</td><td>28 t/ha</td><td style="color:var(--amber);font-weight:700">74/100</td><td><span class="tag-a">MEDIUM</span></td><td><span class="tbadge tbadge-attempt">⚠ Fungal risk</span></td></tr>
+          <tr><td><strong>🧅 Shallots</strong></td><td>F7</td><td>1.8 ha</td><td>Bulb formation</td><td>30 days</td><td>12 t/ha</td><td style="color:var(--red);font-weight:700">61/100</td><td><span class="tag-r">CRITICAL</span></td><td><span class="tbadge tbadge-denied">✕ Low moisture</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🌱 Crop Health Overview</h3></div>
+      <div class="dash-card-body">
+        <div class="canvas-wrap"><canvas id="crop-health-chart" height="200"></canvas></div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📅 Harvest Schedule</h3></div>
+      <div class="dash-card-body" style="display:flex;flex-direction:column;gap:0.65rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem;background:var(--bg-alt);border-radius:8px"><span style="font-size:1.3rem">🥬</span><div style="flex:1"><div style="font-weight:600;font-size:0.88rem">Leafy Veg — F5</div><div style="font-size:0.75rem;color:var(--text-muted)">18–20 t · Est. ₹78,000</div></div><span class="tag-g">22 days</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem;background:var(--bg-alt);border-radius:8px"><span style="font-size:1.3rem">🧅</span><div style="flex:1"><div style="font-weight:600;font-size:0.88rem">Shallots — F7</div><div style="font-size:0.75rem;color:var(--text-muted)">21 t · Est. ₹88,200</div></div><span class="tag-a">30 days</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem;background:var(--bg-alt);border-radius:8px"><span style="font-size:1.3rem">🌾</span><div style="flex:1"><div style="font-weight:600;font-size:0.88rem">Rice — F1 & F2</div><div style="font-size:0.75rem;color:var(--text-muted)">16.8 t · Est. ₹3.66L</div></div><span class="tag-a">38 days</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem;background:var(--bg-alt);border-radius:8px"><span style="font-size:1.3rem">🍌</span><div style="flex:1"><div style="font-weight:600;font-size:0.88rem">Banana — F6</div><div style="font-size:0.75rem;color:var(--text-muted)">44.8 t · Est. ₹1.52L</div></div><span class="tag-b">50 days</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem;background:var(--bg-alt);border-radius:8px"><span style="font-size:1.3rem">🥥</span><div style="flex:1"><div style="font-weight:600;font-size:0.88rem">Coconut — F3</div><div style="font-size:0.75rem;color:var(--text-muted)">3,400 nuts · Est. ₹62,900</div></div><span class="tag-b">65 days</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     3. IOT SENSORS
+════════════════════════════════════════ -->
+<div id="sec-sensors" class="page-section">
+  <div class="sec-h">IoT Sensor Network</div>
+  <div class="sec-s">12 sensors online · LoRaWAN · Last calibrated Nov 10, 2024</div>
+  <div class="dash-stats">
+    <div class="dstat"><div class="dstat-label">Online</div><div class="dstat-num" style="color:var(--green)">12</div><div class="dstat-sub">All systems normal</div><div class="dstat-icon">📡</div></div>
+    <div class="dstat"><div class="dstat-label">Data Points Today</div><div class="dstat-num">8,640</div><div class="dstat-sub">Every 10 seconds</div><div class="dstat-icon">📊</div></div>
+    <div class="dstat amber"><div class="dstat-label">Battery Low</div><div class="dstat-num">1</div><div class="dstat-sub">S-07 · 18%</div><div class="dstat-icon">🔋</div></div>
+    <div class="dstat blue"><div class="dstat-label">Network</div><div class="dstat-num">98%</div><div class="dstat-sub">LoRaWAN · Strong</div><div class="dstat-icon">📶</div></div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📡 All Sensors — Live Readings</h3></div>
+      <div class="dash-card-body" style="padding:0">
+        <table class="threat-table" style="width:100%">
+          <thead><tr><th>ID</th><th>Type</th><th>Field</th><th>Reading</th><th>Battery</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>S-01</strong></td><td>Soil Moisture</td><td>F1</td><td id="ss01">64%</td><td>87%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-02</strong></td><td>Soil Moisture</td><td>F2</td><td id="ss02">71%</td><td>92%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-03</strong></td><td>Soil Moisture</td><td>F3</td><td id="ss03" style="color:var(--red);font-weight:700">34%</td><td>76%</td><td><span class="tbadge tbadge-attempt">⚠ Low moisture</span></td></tr>
+            <tr><td><strong>S-04</strong></td><td>Temp / Humidity</td><td>F1–2</td><td id="ss04">29.1°C / 68%</td><td>81%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-05</strong></td><td>Soil pH</td><td>F4</td><td>6.7</td><td>68%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-06</strong></td><td>Rain Gauge</td><td>Central</td><td id="ss06">1.8mm</td><td>95%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-07</strong></td><td>Wind</td><td>Central</td><td id="ss07">14 km/h NE</td><td style="color:var(--red);font-weight:600">18%</td><td><span class="tbadge tbadge-attempt">⚠ Low battery</span></td></tr>
+            <tr><td><strong>S-08</strong></td><td>Light (PAR)</td><td>F5</td><td id="ss08">7.8k lux</td><td>74%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-09</strong></td><td>CO₂</td><td>F6</td><td>820 ppm</td><td>89%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-10</strong></td><td>Soil Moisture</td><td>F7</td><td id="ss10" style="color:var(--red);font-weight:700">28%</td><td>65%</td><td><span class="tbadge tbadge-denied">✕ Critical low</span></td></tr>
+            <tr><td><strong>S-11</strong></td><td>Flow Meter</td><td>Pump A</td><td id="ss11">4.2 L/min</td><td>91%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+            <tr><td><strong>S-12</strong></td><td>Leaf Wetness</td><td>F6</td><td>Wet (0.82)</td><td>78%</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">● Online</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="dash-card" style="margin-bottom:1.25rem">
+        <div class="dash-card-head"><h3>📈 Temperature Trend — 24 Hours</h3></div>
+        <div class="dash-card-body"><div class="canvas-wrap"><canvas id="temp-chart" height="130"></canvas></div></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-head"><h3>⚙️ Sensor Settings</h3></div>
+        <div class="dash-card-body">
+          <div class="fg"><label class="fl">Reading Interval</label>
+            <select class="fi"><option>Every 10 seconds</option><option>Every 30 seconds</option><option>Every 1 minute</option></select>
+          </div>
+          <div class="fg"><label class="fl">Moisture Alert Threshold (%)</label><input class="fi" type="number" value="40"></div>
+          <div class="fg"><label class="fl">Temperature Alert (°C)</label><input class="fi" type="number" value="38"></div>
+          <button class="btn btn-primary" onclick="showToast('✅ Sensor settings saved!')">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     4. IRRIGATION CONTROL
+════════════════════════════════════════ -->
+<div id="sec-irrigation" class="page-section">
+  <div class="sec-h">Irrigation Control</div>
+  <div class="sec-s">Smart scheduling based on soil moisture, evapotranspiration & weather</div>
+  <div class="dash-stats">
+    <div class="dstat amber"><div class="dstat-label">Today Usage</div><div class="dstat-num" id="irr-usage">4,820 L</div><div class="dstat-sub">↑ 12% vs avg</div><div class="dstat-icon">💧</div></div>
+    <div class="dstat"><div class="dstat-label">This Month</div><div class="dstat-num">1.24L</div><div class="dstat-sub" style="font-size:0.7rem">Lakh litres · ↓ 18% saved</div><div class="dstat-icon">📊</div></div>
+    <div class="dstat red"><div class="dstat-label">Needs Water</div><div class="dstat-num">2</div><div class="dstat-sub">Fields 3 & 7</div><div class="dstat-icon">⚠️</div></div>
+    <div class="dstat"><div class="dstat-label">Pump A</div><div class="dstat-num" style="color:var(--green);font-size:1.3rem" id="pump-status">IDLE</div><div class="dstat-sub" id="pump-sub">Next run 06:00 AM</div><div class="dstat-icon">⚙️</div></div>
+  </div>
+  <!-- Zone Cards -->
+  <div class="zone-grid" style="margin-bottom:1.5rem">
+    <div class="zone-card" id="zone-f1">
+      <div class="zone-head"><div class="zone-name">🌾 Field 1 — Rice</div><label class="toggle"><input type="checkbox" checked onchange="toggleZone('F1',this)"><span class="toggle-sl"></span></label></div>
+      <div class="zone-moisture" style="color:var(--green)" id="zm-f1">82%</div>
+      <div class="zone-status">Soil moisture · Drip · Auto ON</div>
+      <div class="prog-track" style="margin-top:0.6rem"><div class="prog-fill" id="zp-f1" style="width:82%;background:var(--green)"></div></div>
+    </div>
+    <div class="zone-card" id="zone-f2">
+      <div class="zone-head"><div class="zone-name">🌾 Field 2 — Rice</div><label class="toggle"><input type="checkbox" checked onchange="toggleZone('F2',this)"><span class="toggle-sl"></span></label></div>
+      <div class="zone-moisture" style="color:var(--green)" id="zm-f2">76%</div>
+      <div class="zone-status">Soil moisture · Flood · Auto ON</div>
+      <div class="prog-track" style="margin-top:0.6rem"><div class="prog-fill" id="zp-f2" style="width:76%;background:var(--green)"></div></div>
+    </div>
+    <div class="zone-card" id="zone-f3" style="border-color:var(--red)">
+      <div class="zone-head"><div class="zone-name" style="color:var(--red)">⚠ Field 3 — Coconut</div><label class="toggle"><input type="checkbox" onchange="toggleZone('F3',this)"><span class="toggle-sl"></span></label></div>
+      <div class="zone-moisture" style="color:var(--red)" id="zm-f3">34%</div>
+      <div class="zone-status">CRITICAL — Scheduled 06:00 AM</div>
+      <div class="prog-track" style="margin-top:0.6rem"><div class="prog-fill" id="zp-f3" style="width:34%;background:var(--red)"></div></div>
+    </div>
+    <div class="zone-card">
+      <div class="zone-head"><div class="zone-name">🌿 Field 4 — Turmeric</div><label class="toggle"><input type="checkbox" checked onchange="toggleZone('F4',this)"><span class="toggle-sl"></span></label></div>
+      <div class="zone-moisture" style="color:var(--green)" id="zm-f4">71%</div>
+      <div class="zone-status">Soil moisture · Drip · Auto ON</div>
+      <div class="prog-track" style="margin-top:0.6rem"><div class="prog-fill" id="zp-f4" style="width:71%;background:var(--green)"></div></div>
+    </div>
+    <div class="zone-card">
+      <div class="zone-head"><div class="zone-name">🥬 Field 5 — Veg</div><label class="toggle"><input type="checkbox" checked onchange="toggleZone('F5',this)"><span class="toggle-sl"></span></label></div>
+      <div class="zone-moisture" style="color:var(--green)" id="zm-f5">88%</div>
+      <div class="zone-status">Soil moisture · Sprinkler · Auto ON</div>
+      <div class="prog-track" style="margin-top:0.6rem"><div class="prog-fill" id="zp-f5" style="width:88%;background:var(--green)"></div></div>
+    </div>
+    <div class="zone-card" style="border-color:var(--amber)">
+      <div class="zone-head"><div class="zone-name" style="color:var(--amber)">⚠ Field 7 — Shallots</div><label class="toggle"><input type="checkbox" onchange="toggleZone('F7',this)"><span class="toggle-sl"></span></label></div>
+      <div class="zone-moisture" style="color:var(--red)" id="zm-f7">28%</div>
+      <div class="zone-status">LOW — Manual override recommended</div>
+      <div class="prog-track" style="margin-top:0.6rem"><div class="prog-fill" id="zp-f7" style="width:28%;background:var(--red)"></div></div>
+    </div>
+  </div>
+  <!-- Manual override + usage chart -->
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>▶ Manual Override</h3></div>
+      <div class="dash-card-body">
+        <div class="fg"><label class="fl">Select Field</label>
+          <select class="fi" id="irr-field"><option>Field 3 — Coconut</option><option>Field 7 — Shallots</option><option>Field 1 — Rice</option><option>Field 2 — Rice</option><option>Field 4 — Turmeric</option><option>Field 5 — Vegetables</option></select>
+        </div>
+        <div class="fg"><label class="fl">Duration (minutes)</label><input class="fi" type="number" id="irr-dur" value="30" min="5" max="120"></div>
+        <div class="fg"><label class="fl">Method</label>
+          <select class="fi"><option>Drip</option><option>Sprinkler</option><option>Flood</option></select>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <button class="btn btn-primary" style="flex:1" onclick="startIrrigation()">▶ Start Now</button>
+          <button class="btn btn-outline" style="flex:1" onclick="showToast('⏸ All irrigation paused')">⏸ Pause All</button>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>💧 Water Usage — 7 Days</h3></div>
+      <div class="dash-card-body"><div class="canvas-wrap"><canvas id="water-chart" height="160"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     5. SATELLITE MAPS
+════════════════════════════════════════ -->
+<div id="sec-satellite" class="page-section">
+  <div class="sec-h">Satellite Maps</div>
+  <div class="sec-s">ISRO ResourceSat-2A · NDVI Analysis · Last pass Nov 12, 2024</div>
+  <div class="dash-stats">
+    <div class="dstat"><div class="dstat-label">Avg NDVI</div><div class="dstat-num" style="color:var(--green)">0.74</div><div class="dstat-sub">Good vegetation</div><div class="dstat-icon">🛰️</div></div>
+    <div class="dstat amber"><div class="dstat-label">Stressed Area</div><div class="dstat-num">1.2 ha</div><div class="dstat-sub">Field 3 (Coconut)</div><div class="dstat-icon">⚠️</div></div>
+    <div class="dstat"><div class="dstat-label">Coverage</div><div class="dstat-num">14.5 ha</div><div class="dstat-sub">100% scanned</div><div class="dstat-icon">🗺️</div></div>
+    <div class="dstat blue"><div class="dstat-label">Next Pass</div><div class="dstat-num">5 days</div><div class="dstat-sub">Nov 19, 2024</div><div class="dstat-icon">📅</div></div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🛰️ NDVI Map — Full Farm</h3><span class="tag-b">Nov 12 · 10:24 AM</span></div>
+      <div class="dash-card-body">
+        <div class="sat-map">
+          <div class="sat-badge">● LIVE · AC-KL-2847</div>
+          <div class="sat-lbl">14.5 ha · NDVI composite</div>
+        </div>
+        <div class="ndvi-legend">
+          <span><span class="ndvi-dot" style="background:#2dcc70"></span>High (>0.8) · 8.2 ha</span>
+          <span><span class="ndvi-dot" style="background:#f5a623"></span>Moderate · 4.1 ha</span>
+          <span><span class="ndvi-dot" style="background:#e74c3c"></span>Stressed · 1.2 ha</span>
+          <span><span class="ndvi-dot" style="background:#1a4d2a"></span>Fallow · 1.0 ha</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.82rem">
+          <div style="background:var(--bg-alt);padding:0.75rem;border-radius:8px"><strong>Field 1 (Rice)</strong><div style="color:var(--green)">NDVI: 0.82 · Excellent</div></div>
+          <div style="background:var(--bg-alt);padding:0.75rem;border-radius:8px"><strong>Field 3 (Coconut)</strong><div style="color:var(--red)">NDVI: 0.41 · Stressed ⚠</div></div>
+          <div style="background:var(--bg-alt);padding:0.75rem;border-radius:8px"><strong>Field 4 (Turmeric)</strong><div style="color:var(--green)">NDVI: 0.78 · Good</div></div>
+          <div style="background:var(--bg-alt);padding:0.75rem;border-radius:8px"><strong>Field 6 (Banana)</strong><div style="color:var(--amber)">NDVI: 0.63 · Moderate</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📈 NDVI Trend — 6 Months</h3></div>
+      <div class="dash-card-body">
+        <div class="canvas-wrap" style="margin-bottom:1rem"><canvas id="ndvi-chart" height="160"></canvas></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 1 — Rice</span><span style="color:var(--green)">0.82</span></div><div class="prog-track"><div class="prog-fill" style="width:82%;background:var(--green)"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 4 — Turmeric</span><span style="color:var(--green)">0.78</span></div><div class="prog-track"><div class="prog-fill" style="width:78%;background:var(--green)"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 6 — Banana</span><span style="color:var(--amber)">0.63</span></div><div class="prog-track"><div class="prog-fill" style="width:63%;background:var(--amber)"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 3 — Coconut</span><span style="color:var(--red)">0.41</span></div><div class="prog-track"><div class="prog-fill" style="width:41%;background:var(--red)"></div></div></div>
+        <button class="btn btn-outline" style="width:100%;margin-top:0.5rem" onclick="showToast('📄 PDF report queued for download')">📄 Download Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     6. SOIL REPORTS
+════════════════════════════════════════ -->
+<div id="sec-soil" class="page-section">
+  <div class="sec-h">Soil Reports</div>
+  <div class="sec-s">KAU Soil Testing Laboratory, Thrissur · Nov 10, 2024</div>
+  <div class="dash-card" style="margin-bottom:1.5rem">
+    <div class="dash-card-head"><h3>🧪 N-P-K Analysis — All Fields</h3></div>
+    <div class="dash-card-body" style="padding:0">
+      <table class="threat-table" style="width:100%">
+        <thead><tr><th>Field</th><th>Crop</th><th>pH</th><th>Nitrogen (N)</th><th>Phosphorus (P)</th><th>Potassium (K)</th><th>Organic C%</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Field 1</strong></td><td>Rice</td><td>6.4</td><td><span class="tag-g">Optimal</span></td><td><span class="tag-g">Optimal</span></td><td><span class="tag-a">Low</span></td><td>2.1%</td><td>MOP @ 50 kg/ha</td></tr>
+          <tr><td><strong>Field 2</strong></td><td>Rice</td><td>6.6</td><td><span class="tag-g">Optimal</span></td><td><span class="tag-a">Low</span></td><td><span class="tag-g">Optimal</span></td><td>1.8%</td><td>SSP @ 40 kg/ha</td></tr>
+          <tr><td><strong>Field 3</strong></td><td>Coconut</td><td>5.8</td><td><span class="tag-a">Low</span></td><td><span class="tag-g">Optimal</span></td><td><span class="tag-a">Low</span></td><td>1.4%</td><td>Lime + Urea</td></tr>
+          <tr><td><strong>Field 4</strong></td><td>Turmeric</td><td>6.7</td><td><span class="tag-g">Optimal</span></td><td><span class="tag-g">Optimal</span></td><td><span class="tag-g">Optimal</span></td><td>2.4%</td><td>No action ✓</td></tr>
+          <tr><td><strong>Field 5</strong></td><td>Vegetables</td><td>6.9</td><td><span class="tag-g" style="background:#dcfce7;color:#16a34a">High</span></td><td><span class="tag-g">Optimal</span></td><td><span class="tag-g">Optimal</span></td><td>3.1%</td><td>Reduce N input</td></tr>
+          <tr><td><strong>Field 7</strong></td><td>Shallots</td><td>6.2</td><td><span class="tag-a">Low</span></td><td><span class="tag-a">Low</span></td><td><span class="tag-r">Very Low</span></td><td>1.2%</td><td>NPK 17:17:17 @ 80 kg/ha</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📊 pH Levels — All Fields</h3></div>
+      <div class="dash-card-body"><div class="canvas-wrap"><canvas id="soil-chart" height="170"></canvas></div></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📅 Schedule New Soil Test</h3></div>
+      <div class="dash-card-body">
+        <div class="fg"><label class="fl">Select Field</label><select class="fi"><option>Field 1</option><option>Field 2</option><option>Field 3</option><option>Field 4</option><option>Field 5</option><option>Field 7</option></select></div>
+        <div class="fg"><label class="fl">Test Type</label><select class="fi"><option>Full N-P-K + pH</option><option>Micronutrient Analysis</option><option>Complete Soil Profile</option></select></div>
+        <div class="fg"><label class="fl">Preferred Date</label><input class="fi" type="date"></div>
+        <div class="fg"><label class="fl">Lab</label><select class="fi"><option>KAU Lab, Thrissur</option><option>ICAR Lab, Trivandrum</option><option>State Soil Lab, Palakkad</option></select></div>
+        <button class="btn btn-primary" style="width:100%" onclick="showToast('📩 Soil test request submitted!')">Submit Request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     7. PEST & DISEASE
+════════════════════════════════════════ -->
+<div id="sec-pest" class="page-section">
+  <div class="sec-h">Pest & Disease Monitor</div>
+  <div class="sec-s">AI-powered detection via leaf image analysis and sensor data</div>
+  <div class="dash-stats">
+    <div class="dstat red"><div class="dstat-label">Active Alerts</div><div class="dstat-num">2</div><div class="dstat-sub">Require attention</div><div class="dstat-icon">⚠️</div></div>
+    <div class="dstat amber"><div class="dstat-label">At-Risk Fields</div><div class="dstat-num">2</div><div class="dstat-sub">F3, F6</div><div class="dstat-icon">🌿</div></div>
+    <div class="dstat"><div class="dstat-label">AI Scans This Week</div><div class="dstat-num">48</div><div class="dstat-sub">Auto-scheduled</div><div class="dstat-icon">🤖</div></div>
+    <div class="dstat"><div class="dstat-label">Loss Prevented</div><div class="dstat-num" style="color:var(--green)">₹28K</div><div class="dstat-sub">Early detection value</div><div class="dstat-icon">💰</div></div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🚨 Active Alerts</h3></div>
+      <div class="dash-card-body">
+        <div class="alert-feed">
+          <div class="alert-item critical">
+            <div class="alert-icon">🍌</div>
+            <div class="alert-body">
+              <div class="alert-title">Sigatoka Leaf Spot — Field 6 (Banana)</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin:4px 0">AI scan · Confidence 84% · ~0.3 ha affected</div>
+              <div style="font-size:0.82rem"><strong>Action:</strong> Apply Mancozeb 75% WP @ 2g/L. Remove infected leaves. Improve drainage.</div>
+              <div class="alert-time">Detected: Yesterday 02:14 PM</div>
+            </div>
+          </div>
+          <div class="alert-item warning">
+            <div class="alert-icon">🥥</div>
+            <div class="alert-body">
+              <div class="alert-title">Rhinoceros Beetle Risk — Field 3 (Coconut)</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin:4px 0">Trap count: 8 beetles/week · Risk: MEDIUM</div>
+              <div style="font-size:0.82rem"><strong>Action:</strong> Set pheromone traps. Apply Chlorpyriphos to breeding sites.</div>
+              <div class="alert-time">Flagged: 3 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🔍 Risk by Field</h3></div>
+      <div class="dash-card-body">
+        <div class="canvas-wrap" style="margin-bottom:1rem"><canvas id="pest-chart" height="160"></canvas></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 6 — Banana (Sigatoka)</span><span style="color:var(--red)">HIGH 84%</span></div><div class="prog-track"><div class="prog-fill" style="width:84%;background:var(--red)"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 3 — Coconut (Beetle)</span><span style="color:var(--amber)">MED 55%</span></div><div class="prog-track"><div class="prog-fill" style="width:55%;background:var(--amber)"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 7 — Shallots (Thrips)</span><span style="color:var(--amber)">MED 42%</span></div><div class="prog-track"><div class="prog-fill" style="width:42%;background:var(--amber)"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Field 1 — Rice (Blast)</span><span style="color:var(--green)">LOW 12%</span></div><div class="prog-track"><div class="prog-fill" style="width:12%;background:var(--green)"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     8. INVENTORY
+════════════════════════════════════════ -->
+<div id="sec-inventory" class="page-section">
+  <div class="sec-h">Farm Inventory</div>
+  <div class="sec-s">Seeds, fertilizers, pesticides and equipment stock levels</div>
+  <div class="dash-stats">
+    <div class="dstat red"><div class="dstat-label">Low Stock</div><div class="dstat-num">3</div><div class="dstat-sub">Need reordering</div><div class="dstat-icon">📦</div></div>
+    <div class="dstat"><div class="dstat-label">Total SKUs</div><div class="dstat-num">24</div><div class="dstat-sub">Tracked items</div><div class="dstat-icon">📋</div></div>
+    <div class="dstat amber"><div class="dstat-label">Expiring Soon</div><div class="dstat-num">2</div><div class="dstat-sub">Within 30 days</div><div class="dstat-icon">⏰</div></div>
+    <div class="dstat blue"><div class="dstat-label">Stock Value</div><div class="dstat-num">₹82K</div><div class="dstat-sub">Current inventory</div><div class="dstat-icon">💰</div></div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-card-head"><h3>📦 Inventory Stock</h3>
+      <button class="btn btn-primary btn-sm" onclick="showToast('📝 Add item form coming soon')">+ Add Item</button>
+    </div>
+    <div class="dash-card-body" style="padding:0">
+      <table class="market-table" style="font-size:0.85rem">
+        <thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Unit</th><th>Min Level</th><th>Expiry</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Urea (46%)</strong></td><td>Fertilizer</td><td style="color:var(--red);font-weight:700">18 kg</td><td>kg</td><td>25 kg</td><td>Dec 2025</td><td><span class="tbadge tbadge-denied">Low Stock</span></td><td><a href="#" onclick="showToast('🛒 Reorder placed for Urea')" style="color:var(--green);font-weight:600;font-size:0.78rem">Reorder</a></td></tr>
+          <tr><td><strong>MOP (60% K₂O)</strong></td><td>Fertilizer</td><td style="color:var(--red);font-weight:700">12 kg</td><td>kg</td><td>20 kg</td><td>Jun 2025</td><td><span class="tbadge tbadge-denied">Low Stock</span></td><td><a href="#" onclick="showToast('🛒 Reorder placed for MOP')" style="color:var(--green);font-weight:600;font-size:0.78rem">Reorder</a></td></tr>
+          <tr><td><strong>Mancozeb 75% WP</strong></td><td>Fungicide</td><td>2.4 kg</td><td>kg</td><td>1 kg</td><td style="color:var(--amber);font-weight:600">Dec 2024 ⚠</td><td><span class="tbadge tbadge-attempt">Exp. Soon</span></td><td>—</td></tr>
+          <tr><td><strong>Chlorpyriphos 20 EC</strong></td><td>Insecticide</td><td>3.8 L</td><td>litres</td><td>1 L</td><td>Mar 2025</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">OK</span></td><td>—</td></tr>
+          <tr><td><strong>NPK 17:17:17</strong></td><td>Fertilizer</td><td>85 kg</td><td>kg</td><td>30 kg</td><td>Aug 2025</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">OK</span></td><td>—</td></tr>
+          <tr><td><strong>Rice Seeds (Kuruvai)</strong></td><td>Seeds</td><td>22 kg</td><td>kg</td><td>5 kg</td><td>Apr 2025</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">OK</span></td><td>—</td></tr>
+          <tr><td><strong>Drip Emitters (4 LPH)</strong></td><td>Equipment</td><td style="color:var(--red);font-weight:700">8 pcs</td><td>pcs</td><td>20 pcs</td><td>N/A</td><td><span class="tbadge tbadge-denied">Low Stock</span></td><td><a href="#" onclick="showToast('🛒 Reorder placed for Emitters')" style="color:var(--green);font-weight:600;font-size:0.78rem">Reorder</a></td></tr>
+          <tr><td><strong>Neem Oil (Cold-pressed)</strong></td><td>Bio-pesticide</td><td>4.5 L</td><td>litres</td><td>2 L</td><td style="color:var(--amber);font-weight:600">Jan 2025 ⚠</td><td><span class="tbadge tbadge-attempt">Exp. Soon</span></td><td>—</td></tr>
+          <tr><td><strong>DAP Fertilizer (18:46:0)</strong></td><td>Fertilizer</td><td>46 kg</td><td>kg</td><td>25 kg</td><td>Nov 2026</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">OK</span></td><td>—</td></tr>
+          <tr><td><strong>Potash (Muriate, Granular)</strong></td><td>Fertilizer</td><td style="color:var(--red);font-weight:700">9 kg</td><td>kg</td><td>20 kg</td><td>Sep 2026</td><td><span class="tbadge tbadge-denied">Low Stock</span></td><td><a href="#" onclick="showToast('🛒 Reorder placed for Potash')" style="color:var(--green);font-weight:600;font-size:0.78rem">Reorder</a></td></tr>
+          <tr><td><strong>Yellow Sticky Traps</strong></td><td>Pest Control</td><td>64 pcs</td><td>pcs</td><td>30 pcs</td><td>N/A</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">OK</span></td><td>—</td></tr>
+          <tr><td><strong>Trichoderma Bio-fungicide</strong></td><td>Bio-input</td><td>1.1 kg</td><td>kg</td><td>1 kg</td><td style="color:var(--amber);font-weight:600">Feb 2025 ⚠</td><td><span class="tbadge tbadge-attempt">Exp. Soon</span></td><td>—</td></tr>
+          <tr><td><strong>Mulch Film (Black Silver)</strong></td><td>Equipment</td><td>12 rolls</td><td>rolls</td><td>6 rolls</td><td>N/A</td><td><span class="tbadge" style="background:var(--green-pale);color:var(--green)">OK</span></td><td>—</td></tr>
+          <tr><td><strong>Sprayer Nozzles (Cone Type)</strong></td><td>Equipment</td><td style="color:var(--red);font-weight:700">6 pcs</td><td>pcs</td><td>15 pcs</td><td>N/A</td><td><span class="tbadge tbadge-denied">Low Stock</span></td><td><a href="#" onclick="showToast('🛒 Reorder placed for Sprayer Nozzles')" style="color:var(--green);font-weight:600;font-size:0.78rem">Reorder</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     9. MARKET PRICES
+════════════════════════════════════════ -->
+<div id="sec-market" class="page-section">
+  <div class="sec-h">Market Intelligence</div>
+  <div class="sec-s"><span class="live-dot"></span> Live Kerala Mandi prices — refreshed every 15 minutes</div>
+  <div class="dash-stats">
+    <div class="dstat"><div class="dstat-label">Rice (Kuruvai)</div><div class="dstat-num" style="color:var(--green)">₹2,180</div><div class="dstat-sub">▲ ₹49 today</div><div class="dstat-icon">🌾</div></div>
+    <div class="dstat"><div class="dstat-label">Turmeric</div><div class="dstat-num" style="color:var(--green)">₹14,200</div><div class="dstat-sub">▲ ₹760 today</div><div class="dstat-icon">🌿</div></div>
+    <div class="dstat amber"><div class="dstat-label">Banana (Nendran)</div><div class="dstat-num">₹3,400</div><div class="dstat-sub">▼ ₹48 today</div><div class="dstat-icon">🍌</div></div>
+    <div class="dstat blue"><div class="dstat-label">Coconut</div><div class="dstat-num">₹18.50</div><div class="dstat-sub">▲ ₹0.50 today</div><div class="dstat-icon">🥥</div></div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📊 All Commodity Prices</h3></div>
+      <div class="dash-card-body" style="padding:0">
+        <table class="market-table">
+          <thead><tr><th>Commodity</th><th>Variety</th><th>Price</th><th>Change</th><th>Mandi</th><th>MSP</th></tr></thead>
+          <tbody>
+            <tr><td><strong>🌾 Rice (Paddy)</strong></td><td style="color:var(--text-muted)">Kuruvai</td><td><strong>₹2,180/qtl</strong></td><td class="price-up">▲ ₹49</td><td style="color:var(--text-muted)">Tiruvalla</td><td style="color:var(--text-muted)">₹2,183</td></tr>
+            <tr><td><strong>🥥 Coconut</strong></td><td style="color:var(--text-muted)">West Coast Tall</td><td><strong>₹18.50/unit</strong></td><td class="price-up">▲ ₹0.50</td><td style="color:var(--text-muted)">Haripad</td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td><strong>🌿 Turmeric</strong></td><td style="color:var(--text-muted)">Erode Finger</td><td><strong>₹14,200/qtl</strong></td><td class="price-up">▲ ₹760</td><td style="color:var(--text-muted)">Erode</td><td style="color:var(--text-muted)">₹9,000</td></tr>
+            <tr><td><strong>🍌 Banana</strong></td><td style="color:var(--text-muted)">Nendran</td><td><strong>₹3,400/qtl</strong></td><td class="price-down">▼ ₹48</td><td style="color:var(--text-muted)">Ernakulam</td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td><strong>🧅 Small Onion</strong></td><td style="color:var(--text-muted)">Bangalore Rose</td><td><strong>₹4,200/qtl</strong></td><td class="price-down">▼ ₹25</td><td style="color:var(--text-muted)">Kozhikode</td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td><strong>🌳 Rubber</strong></td><td style="color:var(--text-muted)">RSS-4</td><td><strong>₹198/kg</strong></td><td class="price-down">▼ ₹3</td><td style="color:var(--text-muted)">Kottayam</td><td style="color:var(--text-muted)">—</td></tr>
+            <tr><td><strong>🥬 Amaranthus</strong></td><td style="color:var(--text-muted)">Mixed Leafy</td><td><strong>₹1,080/qtl</strong></td><td class="price-up">▲ ₹32</td><td style="color:var(--text-muted)">Kochi</td><td style="color:var(--text-muted)">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>📈 Price Trends — 30 Days</h3></div>
+      <div class="dash-card-body"><div class="canvas-wrap"><canvas id="market-chart" height="200"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     10. WEATHER
+════════════════════════════════════════ -->
+<div id="sec-weather" class="page-section">
+  <div class="sec-h">Farm Weather Forecast</div>
+  <div class="sec-s">Tiruvalla, Kerala — IMD hyper-local · Updated every 3 hours</div>
+  <div class="weather-strip" id="dash-weather-strip" style="margin-bottom:1.5rem"></div>
+  <div class="weather-alert-box" style="margin-bottom:1.5rem">
+    <div class="wab-icon">⛈️</div>
+    <div><div class="wab-title">Heavy Rain Alert — Wednesday</div>
+    <div class="wab-sub">Expected 50–60mm. Avoid pesticide application. Clear drainage channels. Harvest Leafy Veg (F5) by Tuesday evening. Tie banana bunches to prevent lodging.</div></div>
+  </div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🌡️ Hourly Forecast — Today</h3></div>
+      <div class="dash-card-body">
+        <div class="canvas-wrap" style="margin-bottom:1rem"><canvas id="hourly-chart" height="130"></canvas></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;font-size:0.8rem">
+          <div style="background:var(--bg-alt);padding:0.6rem;border-radius:8px;text-align:center">💧<br><strong>68%</strong><br><span style="color:var(--text-muted)">Humidity</span></div>
+          <div style="background:var(--bg-alt);padding:0.6rem;border-radius:8px;text-align:center">🌬️<br><strong>14 km/h</strong><br><span style="color:var(--text-muted)">Wind NE</span></div>
+          <div style="background:var(--bg-alt);padding:0.6rem;border-radius:8px;text-align:center">☀️<br><strong>8 High</strong><br><span style="color:var(--text-muted)">UV Index</span></div>
+          <div style="background:var(--bg-alt);padding:0.6rem;border-radius:8px;text-align:center">🌧️<br><strong>3mm</strong><br><span style="color:var(--text-muted)">Rainfall</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🌾 Farm Weather Advisory</h3></div>
+      <div class="dash-card-body">
+        <div class="alert-feed">
+          <div class="alert-item critical"><div class="alert-icon">⛈️</div><div class="alert-body"><div class="alert-title">Heavy rain Wednesday — harvest Leafy Veg (F5) by Tuesday</div><div class="alert-time">Wednesday forecast · 50–60mm</div></div></div>
+          <div class="alert-item warning"><div class="alert-icon">☀️</div><div class="alert-body"><div class="alert-title">High UV today (Index 8) — coconut palms may need extra watering</div><div class="alert-time">Today · Monitor Field 3</div></div></div>
+          <div class="alert-item"><div class="alert-icon">🌬️</div><div class="alert-body"><div class="alert-title">Wind 14 km/h NE — good spray window today 6–10 AM</div><div class="alert-time">Today · Safe for pesticide application</div></div></div>
+          <div class="alert-item"><div class="alert-icon">💧</div><div class="alert-body"><div class="alert-title">No extra irrigation needed for Fields 1, 2, 5 today</div><div class="alert-time">Soil moisture adequate</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     11. AI ADVISOR
+════════════════════════════════════════ -->
+<div id="sec-ai" class="page-section">
+  <div class="sec-h">AI Farm Advisor</div>
+  <div class="sec-s">Powered by Agri Cloud ML · Trained on 5M+ Indian farm data points</div>
+  <div class="dash-grid2">
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🤖 This Week's Recommendations</h3></div>
+      <div class="dash-card-body">
+        <div class="alert-feed">
+          <div class="alert-item critical"><div class="alert-icon">🧅</div><div class="alert-body"><div class="alert-title">Apply NPK 17:17:17 to Field 7 — within 7 days</div><div class="alert-time">Confidence 96% · Soil K very low · Critical bulb stage</div></div></div>
+          <div class="alert-item warning"><div class="alert-icon">🍌</div><div class="alert-body"><div class="alert-title">Spray Mancozeb on Field 6 before Wednesday rain</div><div class="alert-time">Confidence 84% · Wet leaf + Sigatoka detected</div></div></div>
+          <div class="alert-item"><div class="alert-icon">🌾</div><div class="alert-body"><div class="alert-title">Rice F1&2: Topdress Urea 20 kg/ha at panicle initiation (Day 45)</div><div class="alert-time">Confidence 91% · NDVI + tiller count analysis</div></div></div>
+          <div class="alert-item"><div class="alert-icon">💰</div><div class="alert-body"><div class="alert-title">Hold Turmeric — price trending up 8–10% next 3 weeks</div><div class="alert-time">Market AI · ₹14,200 → projected ₹15,400</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>💬 Ask AI Advisor</h3></div>
+      <div class="dash-card-body">
+        <div class="ai-chat" id="ai-chat">
+          <div class="ai-msg bot" id="ai-greeting">Hello 👋 I'm your Agri Cloud AI Advisor. Ask me anything about your farm — crop health, irrigation, pest management, or market timing.</div>
+        </div>
+        <div class="ai-chips">
+          <span class="ai-chip" onclick="askAI('When to harvest Shallots F7?')">Shallots harvest?</span>
+          <span class="ai-chip" onclick="askAI('How to treat Banana leaf blight?')">Banana disease?</span>
+          <span class="ai-chip" onclick="askAI('Should I irrigate Field 3 today?')">Irrigate F3?</span>
+          <span class="ai-chip" onclick="askAI('Best time to sell Turmeric?')">Turmeric market?</span>
+        </div>
+        <div style="display:flex;gap:0.5rem">
+          <input class="fi" type="text" id="ai-input" placeholder="Ask about any crop, field, pest, irrigation, weather, or prices..." style="flex:1">
+          <button class="btn btn-primary" onclick="askAI()">Ask →</button>
+          <button class="btn btn-outline" onclick="clearAIChat()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     12. ACTIVITY LOGS
+════════════════════════════════════════ -->
+<div id="sec-logs" class="page-section">
+  <div class="sec-h">Activity Logs</div>
+  <div class="sec-s">Complete audit trail — all farm events, alerts and system actions</div>
+  <div class="dash-card">
+    <div class="dash-card-head">
+      <h3>📋 Full Activity Log</h3>
+      <div style="display:flex;gap:0.5rem">
+        <select class="fi" style="padding:0.35rem 0.75rem;font-size:0.8rem;width:auto">
+          <option>All Events</option><option>Irrigation</option><option>AI Alerts</option><option>Security</option><option>System</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="showToast('📄 CSV export downloaded')">Export CSV</button>
+      </div>
+    </div>
+    <div class="dash-card-body" style="padding:0">
+      <table class="threat-table" style="width:100%">
+        <thead><tr><th>Timestamp</th><th>Type</th><th>Description</th><th>Field</th><th>Source</th><th>Status</th></tr></thead>
+        <tbody id="log-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     13. SETTINGS
+════════════════════════════════════════ -->
+<div id="sec-settings" class="page-section">
+  <div class="sec-h">Settings</div>
+  <div class="sec-s">Farm profile, notifications, security and system preferences</div>
+  <div class="dash-grid2">
+    <div>
+      <div class="dash-card" style="margin-bottom:1.25rem">
+        <div class="dash-card-head"><h3>🏡 Farm Profile</h3></div>
+        <div class="dash-card-body">
+          <div class="fg"><label class="fl">Farm Name</label><input class="fi" type="text" id="set-farmname" value="Suresh Kumar Farm — Tiruvalla"></div>
+          <div class="fg"><label class="fl">Farm ID</label><input class="fi" type="text" id="set-farmid" value="AC-KL-2847" disabled style="background:var(--bg-alt)"></div>
+          <div class="fg"><label class="fl">District / State</label><input class="fi" type="text" id="set-district" value="Tiruvalla, Kerala"></div>
+          <div class="fg"><label class="fl">Total Area (hectares)</label><input class="fi" type="number" id="set-area" value="14.5"></div>
+          <div class="fg"><label class="fl">Primary Crops</label><input class="fi" type="text" id="set-crops" value="Rice, Coconut, Turmeric, Banana"></div>
+          <button class="btn btn-primary" onclick="showToast('✅ Profile saved!')">Save Profile</button>
+        </div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-head"><h3>🔒 Change Password</h3></div>
+        <div class="dash-card-body">
+          <div class="fg"><label class="fl">Current Password</label><input class="fi" type="password" placeholder="••••••••"></div>
+          <div class="fg"><label class="fl">New Password</label><input class="fi" type="password" placeholder="••••••••"></div>
+          <div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" placeholder="••••••••"></div>
+          <button class="btn btn-primary" onclick="showToast('🔒 Password updated!')">Update Password</button>
+          <div style="margin-top:1rem;padding:0.75rem;background:var(--red-light);border:1px solid #fca5a5;border-radius:8px;font-size:0.82rem;color:var(--red)">
+            ⚠ Suspicious login from 45.76.184.32 (Netherlands) 4 days ago. <a href="fake-page.html" style="color:var(--red);font-weight:600;text-decoration:underline">View security log →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-head"><h3>🔔 Notification Preferences</h3></div>
+      <div class="dash-card-body">
+        <div class="settings-section">
+          <h4>Alert Channels</h4>
+          <div class="settings-item"><div><div class="sitem-label">SMS Alerts</div><div class="sitem-sub">+91 98765 43210</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">WhatsApp</div><div class="sitem-sub">Critical alerts via WhatsApp</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">Email Reports</div><div class="sitem-sub">suresh@example.com</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">Push Notifications</div><div class="sitem-sub">Mobile app alerts</div></div><label class="toggle"><input type="checkbox"><span class="toggle-sl"></span></label></div>
+        </div>
+        <div class="settings-section">
+          <h4>Alert Types</h4>
+          <div class="settings-item"><div><div class="sitem-label">Irrigation Alerts</div><div class="sitem-sub">Low moisture & schedule triggers</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">Disease & Pest</div><div class="sitem-sub">AI detection alerts</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">Weather Alerts</div><div class="sitem-sub">Rain, frost, wind warnings</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">Market Price Alerts</div><div class="sitem-sub">When crops hit target price</div></div><label class="toggle"><input type="checkbox"><span class="toggle-sl"></span></label></div>
+          <div class="settings-item"><div><div class="sitem-label">Security Alerts</div><div class="sitem-sub">Suspicious login attempts</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-sl"></span></label></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="showToast('✅ Notifications saved!')">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /dash-content -->
+</div><!-- /dash-main -->
+</div><!-- /dash-layout -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script src="js/honeypot.js"></script>
+<script>
+/* ══════════════════════════════════════════════════
+   SESSION — load logged-in user from sessionStorage
+══════════════════════════════════════════════════ */
+const SESSION_DEFAULTS = {
+  name:     'Suresh Kumar',
+  initials: 'SK',
+  farmId:   'AC-KL-2847',
+  district: 'Tiruvalla, Kerala',
+  area:     '14.5',
+  plan:     'Pro',
+  crops:    'Rice, Coconut, Turmeric, Banana',
+  username: 'farmer.rajan',
+};
+
+let SESSION = SESSION_DEFAULTS;
+try {
+  const raw = sessionStorage.getItem('agri_session');
+  if (raw) SESSION = Object.assign({}, SESSION_DEFAULTS, JSON.parse(raw));
+} catch(e) {}
+
+const THEME_KEY = 'agri_theme';
+
+function updateThemeToggleLabel() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const dark = document.body.classList.contains('dark-mode');
+  btn.textContent = dark ? '☀ Light' : '🌙 Dark';
+}
+
+function applyTheme(mode) {
+  document.body.classList.toggle('dark-mode', mode === 'dark');
+  updateThemeToggleLabel();
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+}
+
+function toggleTheme() {
+  const next = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem(THEME_KEY, next);
+  redrawActiveSectionCharts();
+}
+
+function redrawActiveSectionCharts() {
+  if (activeSection==='overview') drawOvChart();
+  if (activeSection==='crops') drawCropHealthChart();
+  if (activeSection==='sensors') drawTempChart();
+  if (activeSection==='irrigation') drawWaterChart();
+  if (activeSection==='satellite') drawNdviChart();
+  if (activeSection==='soil') drawSoilChart();
+  if (activeSection==='pest') drawPestChart();
+  if (activeSection==='market') drawMarketChart();
+  if (activeSection==='weather') drawHourlyChart();
+}
+
+initTheme();
+
+// Helper — first name only
+const FIRST = SESSION.name.split(' ')[0];
+// Initials — up to 2 chars from name
+const INITIALS = SESSION.initials ||
+  SESSION.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+function applySession() {
+  // Sidebar avatar + name + role
+  const sb_av = document.getElementById('sb-avatar');
+  const sb_nm = document.getElementById('sb-name');
+  const sb_rl = document.getElementById('sb-role');
+  if (sb_av) sb_av.textContent = INITIALS;
+  if (sb_nm) sb_nm.textContent = SESSION.name;
+  if (sb_rl) sb_rl.textContent = 'Farm Owner · ' + SESSION.plan + ' Plan';
+
+  // Topbar avatar + first name
+  const tb_av = document.getElementById('tb-avatar');
+  const tb_fn = document.getElementById('tb-firstname');
+  if (tb_av) tb_av.textContent = INITIALS;
+  if (tb_fn) tb_fn.textContent = FIRST;
+
+  // Header farm ID + area subtitles
+  const hdr_id   = document.getElementById('hdr-farmid');
+  const hdr_area = document.getElementById('hdr-area');
+  if (hdr_id)   hdr_id.textContent   = SESSION.farmId;
+  if (hdr_area) hdr_area.textContent = SESSION.area + ' ha';
+
+  // Crop details section subtitle
+  const cr_id   = document.getElementById('crop-farmid');
+  const cr_area = document.getElementById('crop-area');
+  if (cr_id)   cr_id.textContent   = SESSION.farmId;
+  if (cr_area) cr_area.textContent = SESSION.area + ' ha';
+
+  // Settings form fields
+  const sf_name     = document.getElementById('set-farmname');
+  const sf_id       = document.getElementById('set-farmid');
+  const sf_district = document.getElementById('set-district');
+  const sf_area     = document.getElementById('set-area');
+  const sf_crops    = document.getElementById('set-crops');
+  if (sf_name)     sf_name.value     = SESSION.name + ' Farm — ' + SESSION.district.split(',')[0];
+  if (sf_id)       sf_id.value       = SESSION.farmId;
+  if (sf_district) sf_district.value = SESSION.district;
+  if (sf_area)     sf_area.value     = SESSION.area;
+  if (sf_crops)    sf_crops.value    = SESSION.crops;
+
+  // AI greeting
+  const ai_gr = document.getElementById('ai-greeting');
+  if (ai_gr) ai_gr.innerHTML =
+    `Hello ${FIRST} 👋 I'm your Agri Cloud AI Advisor. Ask me anything about your farm — ` +
+    `crop health, irrigation, pest management, or market timing.`;
+
+  // Overview alert banner — personalise farm ID
+  const ov_farmid_els = document.querySelectorAll('.ov-farmid');
+  ov_farmid_els.forEach(el => el.textContent = SESSION.farmId);
+}
+
+// Run immediately so everything is set before first paint
+applySession();
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+const PAGE_TITLES = {
+  overview:'Farm Dashboard', crops:'Crop Details', sensors:'IoT Sensors',
+  irrigation:'Irrigation Control', satellite:'Satellite Maps', soil:'Soil Reports',
+  pest:'Pest & Disease', inventory:'Inventory', market:'Market Prices',
+  weather:'Weather Forecast', ai:'AI Advisor', logs:'Activity Logs', settings:'Settings'
+};
+let activeSection = 'overview';
+function show(id, btn) {
+  document.getElementById('sec-'+activeSection).classList.remove('active');
+  document.getElementById('sec-'+id).classList.add('active');
+  activeSection = id;
+  document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('pageTitle').innerHTML = `${PAGE_TITLES[id]} <span style="font-size:0.72rem;font-weight:400;color:var(--text-muted);margin-left:0.5rem">Farm ID: ${SESSION.farmId} · ${SESSION.area} ha · Kharif 2024</span>`;
+  window.scrollTo(0,0);
+  if (id==='overview') drawOvChart();
+  if (id==='crops') drawCropHealthChart();
+  if (id==='sensors') { drawTempChart(); }
+  if (id==='irrigation') drawWaterChart();
+  if (id==='satellite') drawNdviChart();
+  if (id==='soil') drawSoilChart();
+  if (id==='pest') drawPestChart();
+  if (id==='market') drawMarketChart();
+  if (id==='weather') { buildWeatherStrip(); drawHourlyChart(); }
+  if (id==='logs') buildLogTable();
+}
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ══════════════════════════════════════════════════
+   LIVE SENSOR UPDATES
+══════════════════════════════════════════════════ */
+function rnd(b,d){ return +(b+(Math.random()-.5)*d).toFixed(1); }
+function u(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+setInterval(()=>{
+  u('ov-temp',rnd(29,1.2)+'°C'); u('ov-hum',Math.round(rnd(68,4))+'%');
+  u('ov-soil',Math.round(rnd(58,5))+'%'); u('ov-wind',Math.round(rnd(14,3))+' km/h');
+  u('ov-light',rnd(7.8,.6)+'k lux');
+  u('ss01',Math.round(rnd(64,3))+'%'); u('ss02',Math.round(rnd(71,3))+'%');
+  u('ss03',Math.round(rnd(34,2))+'%'); u('ss04',rnd(29,1)+'°C / '+Math.round(rnd(68,3))+'%');
+  u('ss06',rnd(1.8,.3)+'mm'); u('ss07',Math.round(rnd(14,3))+' km/h NE');
+  u('ss08',rnd(7.8,.5)+'k lux'); u('ss10',Math.round(rnd(28,2))+'%');
+  u('ss11',rnd(4.2,.3)+' L/min');
+},3000);
+
+/* Sync timer */
+let syncSec = 120;
+setInterval(()=>{
+  syncSec--;
+  if(syncSec<=0) syncSec=120;
+  const m=Math.floor(syncSec/60), s=syncSec%60;
+  const el=document.getElementById('sync-time');
+  if(el) el.textContent = m>0 ? m+'m '+s+'s ago' : s+'s ago';
+},1000);
+
+/* ══════════════════════════════════════════════════
+   CANVAS CHART HELPER
+══════════════════════════════════════════════════ */
+function drawLineChart(id, labels, datasets, opts={}) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 400;
+  const H = canvas.height;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  const pad = {t:16,r:16,b:32,l:40};
+  const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  const dark = document.body.classList.contains('dark-mode');
+  const chartBg = dark ? '#16221a' : '#f8fdf9';
+  const gridColor = dark ? '#2f4438' : '#d4e8d7';
+  const axisColor = dark ? '#a7b9ab' : '#9aab9d';
+  // bg
+  ctx.fillStyle=chartBg; ctx.fillRect(0,0,W,H);
+  // grid
+  const allVals = datasets.flatMap(d=>d.data);
+  const minV = opts.min ?? Math.min(...allVals)*0.92;
+  const maxV = opts.max ?? Math.max(...allVals)*1.06;
+  const range = maxV-minV || 1;
+  ctx.strokeStyle=gridColor; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ch*(1-i/4);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+    ctx.fillStyle=axisColor; ctx.font='10px Outfit,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round(minV+range*(i/4))+(opts.suffix||''), pad.l-4, y+3);
+  }
+  // x labels
+  ctx.fillStyle=axisColor; ctx.font='10px Outfit,sans-serif'; ctx.textAlign='center';
+  labels.forEach((l,i)=>{
+    const x=pad.l+cw*(i/(labels.length-1));
+    ctx.fillText(l, x, H-pad.b+14);
+  });
+  // lines
+  datasets.forEach(ds=>{
+    const pts = ds.data.map((v,i)=>({
+      x: pad.l+cw*(i/(ds.data.length-1)),
+      y: pad.t+ch*(1-(v-minV)/range)
+    }));
+    // fill
+    if(ds.fill!==false){
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pad.t+ch);
+      pts.forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.lineTo(pts[pts.length-1].x, pad.t+ch);
+      ctx.closePath();
+      const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
+      grad.addColorStop(0,ds.color+'33');
+      grad.addColorStop(1,ds.color+'00');
+      ctx.fillStyle=grad; ctx.fill();
+    }
+    // line
+    ctx.beginPath();
+    pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle=ds.color; ctx.lineWidth=2.5;
+    ctx.lineJoin='round'; ctx.lineCap='round'; ctx.stroke();
+    // dots
+    pts.forEach(p=>{
+      ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.fillStyle='white'; ctx.fill();
+      ctx.strokeStyle=ds.color; ctx.lineWidth=2; ctx.stroke();
+    });
+  });
+}
+
+function drawBarChart(id, labels, data, colors, opts={}) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 400;
+  const H = canvas.height;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  const pad={t:12,r:16,b:30,l:44};
+  const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  const dark = document.body.classList.contains('dark-mode');
+  const chartBg = dark ? '#16221a' : '#f8fdf9';
+  const gridColor = dark ? '#2f4438' : '#d4e8d7';
+  const axisColor = dark ? '#a7b9ab' : '#9aab9d';
+  ctx.fillStyle=chartBg; ctx.fillRect(0,0,W,H);
+  const maxV=Math.max(...data)*1.1||1;
+  ctx.strokeStyle=gridColor; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ch*(1-i/4);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+    ctx.fillStyle=axisColor; ctx.font='10px Outfit,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round(maxV*i/4)+(opts.suffix||''), pad.l-4, y+3);
+  }
+  const bw=cw/labels.length*0.65, gap=cw/labels.length;
+  labels.forEach((l,i)=>{
+    const x=pad.l+gap*i+gap*0.175;
+    const bh=ch*(data[i]/maxV);
+    const y=pad.t+ch-bh;
+    const c=colors[i]||'#2d7a3a';
+    const grad=ctx.createLinearGradient(x,y,x,pad.t+ch);
+    grad.addColorStop(0,c); grad.addColorStop(1,c+'88');
+    ctx.fillStyle=grad;
+    const r=4;
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+bw-r,y);
+    ctx.quadraticCurveTo(x+bw,y,x+bw,y+r);
+    ctx.lineTo(x+bw,pad.t+ch); ctx.lineTo(x,pad.t+ch);
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.fill();
+    ctx.fillStyle=axisColor; ctx.font='10px Outfit,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(l, x+bw/2, H-pad.b+14);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   INDIVIDUAL CHARTS
+══════════════════════════════════════════════════ */
+function drawOvChart(){
+  drawLineChart('ov-chart',
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    [
+      {data:[52,58,61,55,67,63,64],color:'#2d7a3a',label:'F1'},
+      {data:[68,72,70,74,71,75,76],color:'#3fa04e',label:'F2'},
+      {data:[38,40,37,35,34,33,34],color:'#e74c3c',label:'F3'},
+    ],{suffix:'%'}
+  );
+}
+function drawCropHealthChart(){
+  drawBarChart('crop-health-chart',
+    ['Rice','Coconut','Turmeric','Veg','Banana','Shallots'],
+    [91,72,88,94,74,61],
+    ['#2d7a3a','#e8860a','#2d7a3a','#2d7a3a','#e8860a','#d32f2f'],
+    {suffix:''}
+  );
+}
+function drawTempChart(){
+  const temps=[];
+  for(let i=0;i<24;i++) temps.push(+(24+Math.sin(i/24*Math.PI*2)*5+Math.random()).toFixed(1));
+  drawLineChart('temp-chart',
+    ['0','3','6','9','12','15','18','21','24'].slice(0,8),
+    [{data:temps.filter((_,i)=>i%3===0),color:'#e8860a'}],
+    {suffix:'°C'}
+  );
+}
+function drawWaterChart(){
+  drawBarChart('water-chart',
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    [3200,4100,3800,5100,4820,3600,2900],
+    ['#1565c0','#1565c0','#1565c0','#1565c0','#1565c0','#1565c0','#1565c0'],
+    {suffix:'L'}
+  );
+}
+function drawNdviChart(){
+  drawLineChart('ndvi-chart',
+    ['Jun','Jul','Aug','Sep','Oct','Nov'],
+    [
+      {data:[0.60,0.65,0.68,0.72,0.70,0.74],color:'#2d7a3a'},
+      {data:[0.38,0.40,0.42,0.44,0.41,0.41],color:'#e74c3c'},
+    ],{suffix:'',min:0.3,max:0.9}
+  );
+}
+function drawSoilChart(){
+  drawBarChart('soil-chart',
+    ['F1','F2','F3','F4','F5','F7'],
+    [6.4,6.6,5.8,6.7,6.9,6.2],
+    ['#2d7a3a','#2d7a3a','#e74c3c','#2d7a3a','#2d7a3a','#e8860a'],
+    {suffix:''}
+  );
+}
+function drawPestChart(){
+  drawBarChart('pest-chart',
+    ['F6 Banana','F3 Coconut','F7 Shallots','F1 Rice','F2 Rice','F4 Turmeric'],
+    [84,55,42,12,18,8],
+    ['#d32f2f','#e8860a','#e8860a','#2d7a3a','#2d7a3a','#2d7a3a'],
+    {suffix:'%'}
+  );
+}
+function drawMarketChart(){
+  drawLineChart('market-chart',
+    ['W1','W2','W3','W4'],
+    [
+      {data:[2080,2120,2150,2180],color:'#2d7a3a',label:'Rice'},
+      {data:[13200,13600,13900,14200],color:'#e8860a',label:'Turmeric',fill:false},
+    ],{suffix:''}
+  );
+}
+function drawHourlyChart(){
+  const temps=[26,25,26,28,29,31,32,31,30,29];
+  drawLineChart('hourly-chart',
+    ['6AM','8AM','10AM','12PM','2PM','4PM','6PM','8PM','10PM','12AM'],
+    [{data:temps,color:'#e8860a'}],
+    {suffix:'°C'}
+  );
+}
+
+// Draw default overview chart on load
+setTimeout(drawOvChart, 100);
+
+/* ══════════════════════════════════════════════════
+   WEATHER STRIP
+══════════════════════════════════════════════════ */
+function buildWeatherStrip(){
+  const strip = document.getElementById('dash-weather-strip');
+  if(!strip||strip.children.length>0) return;
+  const w=[
+    {day:'TODAY',icon:'⛅',high:31,low:24,desc:'Partly Cloudy',rain:'15%',today:true},
+    {day:'TUESDAY',icon:'☀️',high:33,low:25,desc:'Mostly Sunny',rain:'5%'},
+    {day:'WEDNESDAY',icon:'⛈️',high:27,low:22,desc:'Heavy Rain',rain:'90%'},
+    {day:'THURSDAY',icon:'🌧️',high:25,low:21,desc:'Thunderstorm',rain:'85%'},
+    {day:'FRIDAY',icon:'🌤️',high:29,low:23,desc:'Clearing',rain:'30%'},
+  ];
+  strip.innerHTML=w.map(d=>`
+    <div class="weather-card${d.today?' today':''}">
+      <div class="wc-day">${d.day}</div><div class="wc-icon">${d.icon}</div>
+      <div class="wc-temp">${d.high}°/${d.low}°</div>
+      <div class="wc-desc">${d.desc}</div>
+      <div class="wc-rain">🌧️ ${d.rain}</div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   ACTIVITY LOG TABLE
+══════════════════════════════════════════════════ */
+function buildLogTable(){
+  const logs=[
+    {ts:'Today 05:30 AM',type:'<span class="tbadge tbadge-visit">Irrigation</span>',desc:'Drip triggered — Field 1 Zone A',field:'F1',src:'Auto',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
+    {ts:'Yesterday 02:14 PM',type:'<span class="tbadge tbadge-denied">Disease Alert</span>',desc:'Sigatoka leaf blight detected — 84% confidence',field:'F6',src:'AI Vision',status:'<span class="tbadge tbadge-attempt">Action needed</span>'},
+    {ts:'Yesterday 06:00 AM',type:'<span class="tbadge tbadge-visit">Irrigation</span>',desc:'Scheduled drip run completed — 480L',field:'F3',src:'Schedule',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
+    {ts:'2 days ago 10:24',type:'<span class="tbadge" style="background:#e0f2fe;color:var(--blue)">Satellite</span>',desc:'NDVI pass — 14.5 ha scanned',field:'All',src:'ISRO',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
+    {ts:'3 days ago 11:15',type:'<span class="tbadge tbadge-visit">Soil Report</span>',desc:'Test results received — Field 4 optimal',field:'F4',src:'KAU Lab',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
+    {ts:'4 days ago 18:02',type:'<span class="tbadge tbadge-denied">Security ⚠</span>',desc:'Login from unknown IP 45.76.184.32 (Amsterdam, NL)',field:'—',src:'Security',status:'<span class="tbadge tbadge-denied">Flagged</span>'},
+    {ts:'4 days ago 09:30',type:'<span class="tbadge tbadge-attempt">Inventory</span>',desc:'Urea stock below threshold (18kg < 25kg)',field:'Store',src:'Auto',status:'<span class="tbadge tbadge-attempt">Reorder</span>'},
+    {ts:'5 days ago 07:45',type:'<span class="tbadge tbadge-visit">Irrigation</span>',desc:'Manual override — Field 7 sprinkler 30 min',field:'F7',src:'Manual',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
+    {ts:'6 days ago 02:00',type:'<span class="tbadge" style="background:#e0f2fe;color:var(--blue)">System</span>',desc:'Daily database backup completed',field:'—',src:'System',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
+  ];
+  const tbody=document.getElementById('log-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=logs.map(l=>`<tr>
+    <td style="color:var(--text-muted);font-size:0.75rem">${l.ts}</td>
+    <td>${l.type}</td><td>${l.desc}</td>
+    <td style="color:var(--text-muted)">${l.field}</td>
+    <td style="color:var(--text-muted)">${l.src}</td>
+    <td>${l.status}</td>
+  </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   IRRIGATION ACTIONS
+══════════════════════════════════════════════════ */
+function toggleZone(f, el){
+  showToast(el.checked ? `💧 ${f} irrigation enabled` : `⏸ ${f} irrigation disabled`);
+}
+function startIrrigation(){
+  const field=document.getElementById('irr-field').value;
+  const dur=document.getElementById('irr-dur').value;
+  u('pump-status','RUNNING'); u('pump-sub',`${field} · ${dur} min`);
+  document.getElementById('pump-status').style.color='var(--amber)';
+  showToast(`▶ Irrigation started — ${field} · ${dur} min`);
+  setTimeout(()=>{
+    u('pump-status','IDLE'); u('pump-sub','Next run 06:00 AM');
+    document.getElementById('pump-status').style.color='var(--green)';
+    showToast(`✅ Irrigation complete — ${field}`);
+  }, parseInt(dur)*1000);
+}
+
+/* ══════════════════════════════════════════════════
+   AI ADVISOR
+══════════════════════════════════════════════════ */
+const AI_STATE = {
+  history: [],
+  lastSnapshot: null,
+  isResponding: false,
+};
+
+function getText(id, fallback='N/A') {
+  const el = document.getElementById(id);
+  if (!el || !el.textContent) return fallback;
+  return el.textContent.trim();
+}
+
+function extractNumber(text, fallback = null) {
+  if (!text || typeof text !== 'string') return fallback;
+  const match = text.replace(/,/g, '').match(/-?\d+(\.\d+)?/);
+  return match ? Number(match[0]) : fallback;
+}
+
+function getLiveFarmSnapshot() {
+  const now = new Date();
+  const tempTxt = getText('ov-temp', '29.0°C');
+  const humTxt = getText('ov-hum', '68%');
+  const soilTxt = getText('ov-soil', '58%');
+  const f3Txt = getText('ss03', '34%');
+  const f7Txt = getText('ss10', '28%');
+  const windTxt = getText('ov-wind', '14 km/h');
+  const healthTxt = getText('ov-health', '87/100');
+  const usageTxt = getText('irr-usage', '4,820 L');
+  const pumpStatusTxt = getText('pump-status', 'IDLE');
+
+  return {
+    timestamp: now,
+    tempC: extractNumber(tempTxt, 29),
+    humidity: extractNumber(humTxt, 68),
+    soilAvg: extractNumber(soilTxt, 58),
+    field3Moisture: extractNumber(f3Txt, 34),
+    field7Moisture: extractNumber(f7Txt, 28),
+    wind: extractNumber(windTxt, 14),
+    healthScore: extractNumber(healthTxt, 87),
+    waterToday: extractNumber(usageTxt, 4820),
+    pumpStatus: pumpStatusTxt,
+    activeAlerts: 2,
+  };
+}
+
+function formatTime(d) {
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+}
+
+function updateAILiveStatus(snapshot) {
+  const statusEl = document.getElementById('ai-status');
+  const syncEl = document.getElementById('ai-last-sync');
+  const dotEl = document.getElementById('ai-status-dot');
+  if (statusEl) statusEl.textContent = `Live sensor sync active · Health ${snapshot.healthScore}/100`;
+  if (syncEl) syncEl.textContent = formatTime(snapshot.timestamp);
+  if (dotEl) dotEl.style.color = snapshot.field3Moisture < 40 || snapshot.field7Moisture < 35 ? 'var(--amber)' : 'var(--green)';
+}
+
+function classifyIntent(question) {
+  const q = question.toLowerCase();
+  if (/(hello|hi|hey|good morning|good evening)/.test(q)) return 'greeting';
+  if (/(urea|mop|npk|dap|mancozeb|chlorpyriphos|neem oil|potash|sticky trap|trichoderma|sprayer nozzle|mulch|seeds|fertilizer|fertiliser|item|stock)/.test(q)) return 'item';
+  if (/(irrigat|water|drip|moisture|pump|field 3|f3|field 7|f7)/.test(q)) return 'irrigation';
+  if (/(disease|pest|blight|sigatoka|fung|beetle|leaf)/.test(q)) return 'disease';
+  if (/(harvest|yield|when to harvest|ready)/.test(q)) return 'harvest';
+  if (/(price|market|sell|mandi|profit|rate|what is the .* rate|cost)/.test(q)) return 'market';
+  if (/(weather|rain|wind|humid|temperature|temp)/.test(q)) return 'weather';
+  if (/(soil|npk|ph|fertili|nutrient|potassium|nitrogen)/.test(q)) return 'soil';
+  if (/(summary|status|overview|report|what now)/.test(q)) return 'summary';
+  return 'general';
+}
+
+function estimateConfidence(intent, question, snapshot) {
+  const base = {
+    greeting: 0.98,
+    irrigation: 0.94,
+    disease: 0.89,
+    harvest: 0.86,
+    market: 0.84,
+    weather: 0.88,
+    soil: 0.87,
+    summary: 0.92,
+    general: 0.72,
+  }[intent] || 0.72;
+
+  let boost = 0;
+  if (/(f3|f7|field 3|field 7|banana|shallot|turmeric|rice|coconut)/i.test(question)) boost += 0.03;
+  if (snapshot && snapshot.tempC != null && snapshot.soilAvg != null) boost += 0.02;
+  return Math.min(0.99, base + boost);
+}
+
+function buildIrrigationAdvice(snapshot, qLower) {
+  const f3 = snapshot.field3Moisture;
+  const f7 = snapshot.field7Moisture;
+  const criticalF3 = f3 < 40;
+  const criticalF7 = f7 < 35;
+
+  if (qLower.includes('f7') || qLower.includes('shallot')) {
+    return criticalF7
+      ? `Field 7 is critical at ${f7}%. Start irrigation now for 25-30 min and recheck after 20 min. Keep soil above 42% during bulb stage.`
+      : `Field 7 moisture is ${f7}%, which is acceptable now. Recheck in 4 hours and irrigate if it drops below 40%.`;
+  }
+  if (qLower.includes('f3') || qLower.includes('coconut')) {
+    return criticalF3
+      ? `Field 3 is low at ${f3}%. Run drip irrigation now for 35-45 min. This should push it toward the 48-52% safe band.`
+      : `Field 3 is at ${f3}%. No emergency, but schedule the next cycle before morning heat to keep moisture stable.`;
+  }
+
+  if (criticalF3 || criticalF7) {
+    return `Immediate irrigation priority: F3 ${f3}% and F7 ${f7}%. Start F7 first (higher crop risk), then F3. Pump state: ${snapshot.pumpStatus}.`;
+  }
+  return `Current average moisture is ${snapshot.soilAvg}%. Maintain routine irrigation and trigger auto-run if any zone falls below 40%.`;
+}
+
+function buildItemAdvice(question) {
+  const q = question.toLowerCase();
+  const items = [
+    { keys: ['urea'], name: 'Urea (46%)', stock: '18 kg', action: 'Reorder soon', use: 'Good for topdressing rice and leafy crops.' },
+    { keys: ['mop', 'potash'], name: 'Potash (Muriate, Granular)', stock: '9 kg', action: 'Low stock', use: 'Useful for bulb filling, fruit quality, and potassium support.' },
+    { keys: ['npk', '17:17:17'], name: 'NPK 17:17:17', stock: '85 kg', action: 'Available', use: 'Balanced fertilizer for general crop feeding.' },
+    { keys: ['mancozeb', 'fungicide'], name: 'Mancozeb 75% WP', stock: '2.4 kg', action: 'Use before rain', use: 'Helps protect banana and vegetable crops from fungal disease.' },
+    { keys: ['chlorpyriphos', 'insecticide'], name: 'Chlorpyriphos 20 EC', stock: '3.8 L', action: 'Available', use: 'Used for insect control when pest pressure rises.' },
+    { keys: ['neem oil'], name: 'Neem Oil (Cold-pressed)', stock: '4.5 L', action: 'Expiring soon', use: 'A mild bio-pesticide for early pest management.' },
+    { keys: ['sticky trap', 'traps'], name: 'Yellow Sticky Traps', stock: '64 pcs', action: 'Enough stock', use: 'Helps monitor and reduce flying pests.' },
+    { keys: ['trichoderma'], name: 'Trichoderma Bio-fungicide', stock: '1.1 kg', action: 'Use soon', use: 'Supports root health and disease suppression.' },
+    { keys: ['sprayer nozzle', 'nozzles'], name: 'Sprayer Nozzles (Cone Type)', stock: '6 pcs', action: 'Low stock', use: 'Needed for spraying and regular field treatment.' },
+    { keys: ['rice seed', 'seeds'], name: 'Rice Seeds (Kuruvai)', stock: '22 kg', action: 'Available', use: 'Good for next sowing or gap filling.' },
+  ];
+
+  const match = items.find(item => item.keys.some(key => q.includes(key)));
+  if (match) {
+    return `Item: ${match.name}. Stock: ${match.stock}. Status: ${match.action}.\nUse: ${match.use}\nIf you want, I can also tell you whether to reorder it now or hold for later.`;
+  }
+
+  return `I can help with farm items like urea, potash, NPK, mancozeb, neem oil, traps, seeds, and sprayer parts.\nTry asking: "How much urea do we have?" or "Should I reorder potash now?"`;
+}
+
+function buildMarketAdvice(question) {
+  const q = question.toLowerCase();
+  const market = {
+    rice: '₹2,180/qtl',
+    turmeric: '₹14,200/qtl',
+    banana: '₹3,400/qtl',
+    coconut: '₹18.50/unit',
+    onion: '₹4,200/qtl',
+    rubber: '₹198/kg',
+    amaranthus: '₹1,080/qtl',
+  };
+
+  if (q.includes('rice')) return `Rice rate is ${market.rice}. Sell part now if you need cash, and keep good stock for a better price later.`;
+  if (q.includes('turmeric')) return `Turmeric rate is ${market.turmeric}. It is holding well, so stagger selling instead of selling all at once.`;
+  if (q.includes('banana')) return `Banana rate is ${market.banana}. Sell when the bunch is ready and transport is available.`;
+  if (q.includes('coconut')) return `Coconut rate is ${market.coconut}. Small lot selling is usually safer for steady income.`;
+  if (q.includes('onion') || q.includes('shallot')) return `Small onion / shallot rate is ${market.onion}. Check your local trader before selling in bulk.`;
+  if (q.includes('rubber')) return `Rubber rate is ${market.rubber}. Good to sell when tapping output is steady.`;
+  if (q.includes('amaranthus') || q.includes('leafy')) return `Leafy veg rate is ${market.amaranthus}. Fresh harvest and quick sale usually get the best return.`;
+
+  return `I can answer market questions for rice, turmeric, banana, coconut, onion, rubber, and leafy crops.\nTry asking: "What is the rice rate?" or "Best time to sell turmeric?"`;
+}
+
+function buildAIResponse(question, snapshot) {
+  const intent = classifyIntent(question);
+  const qLower = question.toLowerCase();
+  const confidence = estimateConfidence(intent, question, snapshot);
+
+  if (intent === 'greeting') {
+    return {
+      text: `Hello ${FIRST}. I can help with your farm in simple words.\nCurrent status: health ${snapshot.healthScore}/100, moisture ${snapshot.soilAvg}%, alerts ${snapshot.activeAlerts}.\nAsk me about irrigation, diseases, harvest, items, or market rates.`,
+      confidence,
+    };
+  }
+
+  if (intent === 'item') {
+    return {
+      text: buildItemAdvice(question),
+      confidence,
+    };
+  }
+
+  if (intent === 'market') {
+    return {
+      text: buildMarketAdvice(question),
+      confidence,
+    };
+  }
+
+  if (intent === 'irrigation') {
+    return {
+      text: `${buildIrrigationAdvice(snapshot, qLower)}\nLive values: avg moisture ${snapshot.soilAvg}%, F3 ${snapshot.field3Moisture}%, F7 ${snapshot.field7Moisture}%, water used today ${Math.round(snapshot.waterToday)} L.`,
+      confidence,
+    };
+  }
+
+  if (intent === 'disease') {
+    return {
+      text: `Disease risk is higher when humidity stays high. Live humidity is ${snapshot.humidity}% and temperature is ${snapshot.tempC}°C.\nFor Banana (F6): spray before rain, remove infected leaves, and avoid overhead irrigation for a few days.\nFor Coconut (F3): keep traps and field sanitation active.`,
+      confidence,
+    };
+  }
+
+  if (intent === 'harvest') {
+    return {
+      text: `Harvest guidance: Shallots (F7) are on track for about 28-32 days if moisture is kept above 42%.\nLeafy vegetables should be harvested before heavy rain when possible.\nIf you want, I can give a simple field-wise harvest plan.`,
+      confidence,
+    };
+  }
+
+  if (intent === 'weather') {
+    const rainRisk = snapshot.humidity > 75 ? 'high' : snapshot.humidity > 65 ? 'moderate' : 'low';
+    return {
+      text: `Weather advice: temp ${snapshot.tempC}°C, humidity ${snapshot.humidity}%, wind ${snapshot.wind} km/h.\nRain and fungus risk is ${rainRisk}. Spray in low-wind hours and avoid watering just before rain.`,
+      confidence,
+    };
+  }
+
+  if (intent === 'soil') {
+    return {
+      text: `Soil advice: first fix moisture in F3 and F7, then add the right fertilizer.\nAction order: 1) water recovery, 2) targeted NPK, 3) check again tomorrow.\nAsk me for a simple soil plan if you want field-wise steps.`,
+      confidence,
+    };
+  }
+
+  if (intent === 'summary') {
+    return {
+      text: `Live farm summary: health ${snapshot.healthScore}/100, moisture ${snapshot.soilAvg}%, F3 ${snapshot.field3Moisture}%, F7 ${snapshot.field7Moisture}%, water today ${Math.round(snapshot.waterToday)} L, pump ${snapshot.pumpStatus}.\nTop priority now: protect weak plots and bring low moisture back up.`,
+      confidence,
+    };
+  }
+
+  return {
+    text: `I can help with simple farm questions. Try asking about a crop, field, item, irrigation, or market rate.\nExample: "What is the urea stock?" or "What is the turmeric rate?"\nLive baseline: health ${snapshot.healthScore}/100, moisture ${snapshot.soilAvg}%, humidity ${snapshot.humidity}%.`,
+    confidence,
+  };
+}
+
+function addChatMessage(role, text) {
+  const chat = document.getElementById('ai-chat');
+  const msg = document.createElement('div');
+  msg.className = `ai-msg ${role}`;
+  msg.style.whiteSpace = 'pre-line';
+  msg.textContent = role === 'bot' ? `🤖 ${text}` : text;
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+  return msg;
+}
+
+function streamBotText(container, fullText, done) {
+  container.textContent = '🤖 ';
+  container.style.whiteSpace = 'pre-line';
+  let i = 0;
+  const speed = 16;
+  const timer = setInterval(() => {
+    i += 3;
+    container.textContent = '🤖 ' + fullText.slice(0, i);
+    const chat = document.getElementById('ai-chat');
+    if (chat) chat.scrollTop = chat.scrollHeight;
+    if (i >= fullText.length) {
+      clearInterval(timer);
+      if (done) done();
+    }
+  }, speed);
+}
+
+function clearAIChat() {
+  const chat = document.getElementById('ai-chat');
+  if (!chat) return;
+  chat.innerHTML = `<div class="ai-msg bot" id="ai-greeting">Hello ${FIRST} 👋 I'm your Agri Cloud AI Advisor. Ask me anything about your farm — crop health, irrigation, pest management, or market timing.</div>`;
+  AI_STATE.history = [];
+  showToast('🧹 AI chat cleared');
+}
+
+function askAI(preset) {
+  const input = document.getElementById('ai-input');
+  const q = (preset || input.value || '').trim();
+  if (!q || AI_STATE.isResponding) return;
+
+  AI_STATE.isResponding = true;
+  addChatMessage('user', q);
+  input.value = '';
+
+  const chat = document.getElementById('ai-chat');
+  const typing = document.createElement('div');
+  typing.className = 'ai-msg bot ai-typing';
+  typing.textContent = 'AI analysing live sensor feed.';
+  chat.appendChild(typing);
+  chat.scrollTop = chat.scrollHeight;
+
+  let dots = 0;
+  const dotsTimer = setInterval(() => {
+    dots = (dots + 1) % 4;
+    typing.textContent = 'AI analysing live sensor feed' + '.'.repeat(dots);
+  }, 350);
+
+  setTimeout(() => {
+    clearInterval(dotsTimer);
+    if (typing.parentNode) typing.parentNode.removeChild(typing);
+
+    const snapshot = getLiveFarmSnapshot();
+    AI_STATE.lastSnapshot = snapshot;
+    updateAILiveStatus(snapshot);
+
+    const result = buildAIResponse(q, snapshot);
+    const botDiv = document.createElement('div');
+    botDiv.className = 'ai-msg bot';
+    chat.appendChild(botDiv);
+
+    streamBotText(botDiv, result.text, () => {
+      AI_STATE.history.push({
+        question: q,
+        answer: result.text,
+        confidence: result.confidence,
+        at: snapshot.timestamp.toISOString(),
+      });
+      if (AI_STATE.history.length > 20) AI_STATE.history.shift();
+      AI_STATE.isResponding = false;
+    });
+  }, 900);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.id === 'ai-input' && !e.shiftKey) {
+    e.preventDefault();
+    askAI();
+  }
+});
+
+setInterval(() => {
+  const snapshot = getLiveFarmSnapshot();
+  AI_STATE.lastSnapshot = snapshot;
+  updateAILiveStatus(snapshot);
+}, 4000);
+
+/* ══════════════════════════════════════════════════
+   MOBILE MENU
+══════════════════════════════════════════════════ */
+const sidebar = document.getElementById('dashSidebar');
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+function isMobileSidebar() {
+  return window.innerWidth <= 900;
+}
+
+function openSidebarMenu() {
+  if (!sidebar || !isMobileSidebar()) return;
+  sidebar.classList.add('open');
+  document.body.classList.add('sidebar-open');
+}
+
+function closeSidebarMenu() {
+  if (!sidebar) return;
+  sidebar.classList.remove('open');
+  document.body.classList.remove('sidebar-open');
+}
+
+function toggleSidebarMenu(evt) {
+  if (evt) evt.stopPropagation();
+  if (!sidebar || !isMobileSidebar()) return;
+  if (sidebar.classList.contains('open')) closeSidebarMenu();
+  else openSidebarMenu();
+}
+
+if (sidebarBackdrop) {
+  sidebarBackdrop.addEventListener('click', closeSidebarMenu);
+  sidebarBackdrop.addEventListener('touchstart', closeSidebarMenu, { passive: true });
+}
+
+if (sidebar) {
+  sidebar.addEventListener('click', e => e.stopPropagation());
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSidebarMenu();
+});
+
+document.querySelectorAll('.dash-nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (isMobileSidebar()) closeSidebarMenu();
+  });
+});
+
+window.addEventListener('resize', () => {
+  const btn = document.getElementById('menuBtn');
+  if (btn) btn.style.display = isMobileSidebar() ? 'flex' : 'none';
+  if (!isMobileSidebar()) closeSidebarMenu();
+});
+const themeBtn = document.getElementById('themeToggle');
+if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+updateThemeToggleLabel();
+window.dispatchEvent(new Event('resize'));
+</script>
+</body>
+</html>
