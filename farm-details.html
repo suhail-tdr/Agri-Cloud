@@ -638,12 +638,12 @@
   <div class="sec-s">Complete audit trail — all farm events, alerts and system actions</div>
   <div class="dash-card">
     <div class="dash-card-head">
-      <h3>📋 Full Activity Log</h3>
+      <h3>📋 Full Activity Log <span class="tag-g" style="margin-left:0.5rem;font-size:0.72rem">● Live</span></h3>
       <div style="display:flex;gap:0.5rem">
         <select class="fi" style="padding:0.35rem 0.75rem;font-size:0.8rem;width:auto">
           <option>All Events</option><option>Irrigation</option><option>AI Alerts</option><option>Security</option><option>System</option>
         </select>
-        <button class="btn btn-outline btn-sm" onclick="showToast('📄 CSV export downloaded')">Export CSV</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="exportActivityCsv()">Export CSV</button>
       </div>
     </div>
     <div class="dash-card-body" style="padding:0">
@@ -867,7 +867,7 @@ function show(id, btn) {
   if (id==='pest') drawPestChart();
   if (id==='market') drawMarketChart();
   if (id==='weather') { buildWeatherStrip(); drawHourlyChart(); }
-  if (id==='logs') buildLogTable();
+  if (id==='logs') renderActivityLogs();
 }
 
 /* ══════════════════════════════════════════════════
@@ -886,15 +886,173 @@ function showToast(msg) {
 ══════════════════════════════════════════════════ */
 function rnd(b,d){ return +(b+(Math.random()-.5)*d).toFixed(1); }
 function u(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+const ACTIVITY_LOGS = [
+  { ts:'Today 05:30 AM', type:'Irrigation', typeTone:'visit', desc:'Drip triggered — Field 1 Zone A', field:'F1', src:'Auto', status:'Done', statusTone:'success' },
+  { ts:'Yesterday 02:14 PM', type:'Disease Alert', typeTone:'denied', desc:'Sigatoka leaf blight detected — 84% confidence', field:'F6', src:'AI Vision', status:'Action needed', statusTone:'warning' },
+  { ts:'Yesterday 06:00 AM', type:'Irrigation', typeTone:'visit', desc:'Scheduled drip run completed — 480L', field:'F3', src:'Schedule', status:'Done', statusTone:'success' },
+  { ts:'2 days ago 10:24', type:'Satellite', typeTone:'info', desc:'NDVI pass — 14.5 ha scanned', field:'All', src:'ISRO', status:'Done', statusTone:'success' },
+  { ts:'3 days ago 11:15', type:'Soil Report', typeTone:'visit', desc:'Test results received — Field 4 optimal', field:'F4', src:'KAU Lab', status:'Done', statusTone:'success' },
+  { ts:'4 days ago 18:02', type:'Security ⚠', typeTone:'denied', desc:'Login from unknown IP 45.76.184.32 (Amsterdam, NL)', field:'—', src:'Security', status:'Flagged', statusTone:'danger' },
+  { ts:'4 days ago 09:30', type:'Inventory', typeTone:'attempt', desc:'Urea stock below threshold (18kg < 25kg)', field:'Store', src:'Auto', status:'Reorder', statusTone:'warning' },
+  { ts:'5 days ago 07:45', type:'Irrigation', typeTone:'visit', desc:'Manual override — Field 7 sprinkler 30 min', field:'F7', src:'Manual', status:'Done', statusTone:'success' },
+  { ts:'6 days ago 02:00', type:'System', typeTone:'info', desc:'Daily database backup completed', field:'—', src:'System', status:'Done', statusTone:'success' },
+];
+
+const LIVE_ACTIVITY_STATE = {
+  field3Alert: null,
+  field7Alert: null,
+  lastSyncLogAt: 0,
+  lastSnapshotSignature: '',
+};
+
+function badgeHtml(text, tone) {
+  if (tone === 'visit') return `<span class="tbadge tbadge-visit">${text}</span>`;
+  if (tone === 'denied') return `<span class="tbadge tbadge-denied">${text}</span>`;
+  if (tone === 'attempt') return `<span class="tbadge tbadge-attempt">${text}</span>`;
+  if (tone === 'danger') return `<span class="tbadge tbadge-denied">${text}</span>`;
+  if (tone === 'warning') return `<span class="tbadge tbadge-attempt">${text}</span>`;
+  return `<span class="tbadge" style="background:#e0f2fe;color:var(--blue)">${text}</span>`;
+}
+
+function statusHtml(text, tone) {
+  if (tone === 'success') return `<span class="tbadge" style="background:var(--green-pale);color:var(--green)">${text}</span>`;
+  if (tone === 'warning') return `<span class="tbadge tbadge-attempt">${text}</span>`;
+  if (tone === 'danger') return `<span class="tbadge tbadge-denied">${text}</span>`;
+  return `<span class="tbadge" style="background:#e0f2fe;color:var(--blue)">${text}</span>`;
+}
+
+function renderActivityRow(log) {
+  return `<tr>
+    <td style="color:var(--text-muted);font-size:0.75rem">${log.ts}</td>
+    <td>${badgeHtml(log.type, log.typeTone)}</td>
+    <td>${log.desc}</td>
+    <td style="color:var(--text-muted)">${log.field}</td>
+    <td style="color:var(--text-muted)">${log.src}</td>
+    <td>${statusHtml(log.status, log.statusTone)}</td>
+  </tr>`;
+}
+
+function renderActivityLogs() {
+  const tbody = document.getElementById('log-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = ACTIVITY_LOGS.map(renderActivityRow).join('');
+}
+
+function addActivityLog(entry) {
+  ACTIVITY_LOGS.unshift(entry);
+  if (ACTIVITY_LOGS.length > 80) ACTIVITY_LOGS.length = 80;
+  if (document.getElementById('log-tbody')) renderActivityLogs();
+}
+
+function csvEscape(value) {
+  return '"' + String(value ?? '').replace(/"/g, '""') + '"';
+}
+
+function exportActivityCsv() {
+  const rows = [
+    ['Timestamp', 'Type', 'Description', 'Field', 'Source', 'Status'],
+    ...ACTIVITY_LOGS.map(log => [log.ts, log.type, log.desc, log.field, log.src, log.status]),
+  ].map(row => row.map(csvEscape).join(',')).join('\r\n');
+
+  const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `agri-cloud-activity-log-${SESSION.farmId}-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast('📄 Activity log CSV downloaded');
+}
+
+function recordLiveActivityFromSnapshot(snapshot) {
+  const now = Date.now();
+  const signature = [snapshot.tempC, snapshot.humidity, snapshot.soilAvg, snapshot.field3Moisture, snapshot.field7Moisture, snapshot.healthScore, snapshot.pumpStatus].join('|');
+
+  const field3Alert = snapshot.field3Moisture < 40;
+  if (LIVE_ACTIVITY_STATE.field3Alert === null) LIVE_ACTIVITY_STATE.field3Alert = field3Alert;
+  if (field3Alert !== LIVE_ACTIVITY_STATE.field3Alert) {
+    addActivityLog({
+      ts: formatTime(snapshot.timestamp),
+      type: 'Irrigation',
+      typeTone: 'visit',
+      desc: field3Alert ? 'Field 3 moisture dropped below threshold — irrigation recommended' : 'Field 3 moisture recovered above threshold',
+      field: 'F3',
+      src: 'Live Sensor',
+      status: field3Alert ? 'Alert raised' : 'Recovered',
+      statusTone: field3Alert ? 'warning' : 'success',
+    });
+    LIVE_ACTIVITY_STATE.field3Alert = field3Alert;
+  }
+
+  const field7Alert = snapshot.field7Moisture < 30;
+  if (LIVE_ACTIVITY_STATE.field7Alert === null) LIVE_ACTIVITY_STATE.field7Alert = field7Alert;
+  if (field7Alert !== LIVE_ACTIVITY_STATE.field7Alert) {
+    addActivityLog({
+      ts: formatTime(snapshot.timestamp),
+      type: 'Inventory',
+      typeTone: 'attempt',
+      desc: field7Alert ? 'Field 7 moisture entered critical range' : 'Field 7 moisture back in safe range',
+      field: 'F7',
+      src: 'Live Sensor',
+      status: field7Alert ? 'Critical' : 'Stable',
+      statusTone: field7Alert ? 'danger' : 'success',
+    });
+    LIVE_ACTIVITY_STATE.field7Alert = field7Alert;
+  }
+
+  if (now - LIVE_ACTIVITY_STATE.lastSyncLogAt >= 60000 && signature !== LIVE_ACTIVITY_STATE.lastSnapshotSignature) {
+    addActivityLog({
+      ts: formatTime(snapshot.timestamp),
+      type: 'System',
+      typeTone: 'info',
+      desc: `Live telemetry synced — temp ${snapshot.tempC}°C, humidity ${snapshot.humidity}%, soil ${snapshot.soilAvg}%`,
+      field: 'All',
+      src: 'Telemetry',
+      status: 'Synced',
+      statusTone: 'success',
+    });
+    LIVE_ACTIVITY_STATE.lastSyncLogAt = now;
+    LIVE_ACTIVITY_STATE.lastSnapshotSignature = signature;
+  }
+}
 setInterval(()=>{
-  u('ov-temp',rnd(29,1.2)+'°C'); u('ov-hum',Math.round(rnd(68,4))+'%');
-  u('ov-soil',Math.round(rnd(58,5))+'%'); u('ov-wind',Math.round(rnd(14,3))+' km/h');
-  u('ov-light',rnd(7.8,.6)+'k lux');
-  u('ss01',Math.round(rnd(64,3))+'%'); u('ss02',Math.round(rnd(71,3))+'%');
-  u('ss03',Math.round(rnd(34,2))+'%'); u('ss04',rnd(29,1)+'°C / '+Math.round(rnd(68,3))+'%');
-  u('ss06',rnd(1.8,.3)+'mm'); u('ss07',Math.round(rnd(14,3))+' km/h NE');
-  u('ss08',rnd(7.8,.5)+'k lux'); u('ss10',Math.round(rnd(28,2))+'%');
-  u('ss11',rnd(4.2,.3)+' L/min');
+  const temp = rnd(29,1.2);
+  const hum = Math.round(rnd(68,4));
+  const soil = Math.round(rnd(58,5));
+  const wind = Math.round(rnd(14,3));
+  const light = rnd(7.8,.6);
+  const f1 = Math.round(rnd(64,3));
+  const f2 = Math.round(rnd(71,3));
+  const f3 = Math.round(rnd(34,2));
+  const f4Temp = rnd(29,1);
+  const f4Hum = Math.round(rnd(68,3));
+  const rain = rnd(1.8,.3);
+  const windCentral = Math.round(rnd(14,3));
+  const lightF5 = rnd(7.8,.5);
+  const f7 = Math.round(rnd(28,2));
+  const flow = rnd(4.2,.3);
+
+  u('ov-temp',temp+'°C'); u('ov-hum',hum+'%');
+  u('ov-soil',soil+'%'); u('ov-wind',wind+' km/h');
+  u('ov-light',light+'k lux');
+  u('ss01',f1+'%'); u('ss02',f2+'%');
+  u('ss03',f3+'%'); u('ss04',f4Temp+'°C / '+f4Hum+'%');
+  u('ss06',rain+'mm'); u('ss07',windCentral+' km/h NE');
+  u('ss08',lightF5+'k lux'); u('ss10',f7+'%');
+  u('ss11',flow+' L/min');
+
+  recordLiveActivityFromSnapshot({
+    timestamp: new Date(),
+    tempC: temp,
+    humidity: hum,
+    soilAvg: soil,
+    field3Moisture: f3,
+    field7Moisture: f7,
+    healthScore: extractNumber(getText('ov-health', '87/100'), 87),
+    pumpStatus: getText('pump-status', 'IDLE'),
+  });
 },3000);
 
 /* Sync timer */
@@ -1133,32 +1291,23 @@ function buildWeatherStrip(){
    ACTIVITY LOG TABLE
 ══════════════════════════════════════════════════ */
 function buildLogTable(){
-  const logs=[
-    {ts:'Today 05:30 AM',type:'<span class="tbadge tbadge-visit">Irrigation</span>',desc:'Drip triggered — Field 1 Zone A',field:'F1',src:'Auto',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
-    {ts:'Yesterday 02:14 PM',type:'<span class="tbadge tbadge-denied">Disease Alert</span>',desc:'Sigatoka leaf blight detected — 84% confidence',field:'F6',src:'AI Vision',status:'<span class="tbadge tbadge-attempt">Action needed</span>'},
-    {ts:'Yesterday 06:00 AM',type:'<span class="tbadge tbadge-visit">Irrigation</span>',desc:'Scheduled drip run completed — 480L',field:'F3',src:'Schedule',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
-    {ts:'2 days ago 10:24',type:'<span class="tbadge" style="background:#e0f2fe;color:var(--blue)">Satellite</span>',desc:'NDVI pass — 14.5 ha scanned',field:'All',src:'ISRO',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
-    {ts:'3 days ago 11:15',type:'<span class="tbadge tbadge-visit">Soil Report</span>',desc:'Test results received — Field 4 optimal',field:'F4',src:'KAU Lab',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
-    {ts:'4 days ago 18:02',type:'<span class="tbadge tbadge-denied">Security ⚠</span>',desc:'Login from unknown IP 45.76.184.32 (Amsterdam, NL)',field:'—',src:'Security',status:'<span class="tbadge tbadge-denied">Flagged</span>'},
-    {ts:'4 days ago 09:30',type:'<span class="tbadge tbadge-attempt">Inventory</span>',desc:'Urea stock below threshold (18kg < 25kg)',field:'Store',src:'Auto',status:'<span class="tbadge tbadge-attempt">Reorder</span>'},
-    {ts:'5 days ago 07:45',type:'<span class="tbadge tbadge-visit">Irrigation</span>',desc:'Manual override — Field 7 sprinkler 30 min',field:'F7',src:'Manual',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
-    {ts:'6 days ago 02:00',type:'<span class="tbadge" style="background:#e0f2fe;color:var(--blue)">System</span>',desc:'Daily database backup completed',field:'—',src:'System',status:'<span class="tbadge" style="background:var(--green-pale);color:var(--green)">Done</span>'},
-  ];
-  const tbody=document.getElementById('log-tbody');
-  if(!tbody) return;
-  tbody.innerHTML=logs.map(l=>`<tr>
-    <td style="color:var(--text-muted);font-size:0.75rem">${l.ts}</td>
-    <td>${l.type}</td><td>${l.desc}</td>
-    <td style="color:var(--text-muted)">${l.field}</td>
-    <td style="color:var(--text-muted)">${l.src}</td>
-    <td>${l.status}</td>
-  </tr>`).join('');
+  renderActivityLogs();
 }
 
 /* ══════════════════════════════════════════════════
    IRRIGATION ACTIONS
 ══════════════════════════════════════════════════ */
 function toggleZone(f, el){
+  addActivityLog({
+    ts: formatTime(new Date()),
+    type: 'Irrigation',
+    typeTone: 'visit',
+    desc: el.checked ? `${f} irrigation enabled` : `${f} irrigation disabled`,
+    field: f,
+    src: 'Manual',
+    status: el.checked ? 'Enabled' : 'Disabled',
+    statusTone: el.checked ? 'success' : 'warning',
+  });
   showToast(el.checked ? `💧 ${f} irrigation enabled` : `⏸ ${f} irrigation disabled`);
 }
 function startIrrigation(){
@@ -1166,10 +1315,30 @@ function startIrrigation(){
   const dur=document.getElementById('irr-dur').value;
   u('pump-status','RUNNING'); u('pump-sub',`${field} · ${dur} min`);
   document.getElementById('pump-status').style.color='var(--amber)';
+  addActivityLog({
+    ts: formatTime(new Date()),
+    type: 'Irrigation',
+    typeTone: 'visit',
+    desc: `Irrigation started — ${field} for ${dur} min`,
+    field,
+    src: 'Manual',
+    status: 'Running',
+    statusTone: 'warning',
+  });
   showToast(`▶ Irrigation started — ${field} · ${dur} min`);
   setTimeout(()=>{
     u('pump-status','IDLE'); u('pump-sub','Next run 06:00 AM');
     document.getElementById('pump-status').style.color='var(--green)';
+    addActivityLog({
+      ts: formatTime(new Date()),
+      type: 'Irrigation',
+      typeTone: 'visit',
+      desc: `Irrigation completed — ${field}`,
+      field,
+      src: 'Manual',
+      status: 'Completed',
+      statusTone: 'success',
+    });
     showToast(`✅ Irrigation complete — ${field}`);
   }, parseInt(dur)*1000);
 }

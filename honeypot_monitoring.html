@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Visitor Activity Monitor — AgriFarm Honeypot</title>
+<title>Visitor Activity Monitor — AgriCloud Honeypot</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="stylesheet" href="css/monitoring.css">
@@ -15,7 +15,7 @@
 <div class="topbar">
   <div class="topbar-left">
     <div class="topbar-logo">🕵️ ACTIVITY MONITOR</div>
-    <div class="topbar-tag">AGRIFARM HONEYPOT INTELLIGENCE SYSTEM</div>
+    <div class="topbar-tag">AGRICLOUD HONEYPOT INTELLIGENCE SYSTEM</div>
   </div>
   <div class="topbar-right">
     <div id="clock" style="color:var(--text)">--:--:--</div>
@@ -23,11 +23,27 @@
     <div class="email-indicator" id="email-ind" onclick="openSettings()" title="Email Alert Settings">
       <div class="ei-dot"></div><span id="email-ind-txt">EMAIL ALERTS OFF</span>
     </div>
+    <button class="ctrl-btn" onclick="exportCsv()">EXPORT CSV</button>
     <button class="ctrl-btn danger" onclick="clearAll()">CLEAR</button>
     <a href="fake-page.html" target="_blank" class="ctrl-btn">OPEN TRAP ↗</a>
-    <a href="honeypot_dashboard.html" class="ctrl-btn">← DASHBOARD</a>
   </div>
 </div>
+
+<section class="hero-panel">
+  <div>
+    <div class="hero-kicker">AGRICULTURE THREAT INTELLIGENCE</div>
+    <h1 class="hero-title">Visitor Activity Monitor</h1>
+    <p class="hero-copy">Track attacks in real time, inspect the fingerprint trail, and export the active feed whenever you need a clean CSV.</p>
+  </div>
+  <div class="hero-actions">
+    <button class="open-trap-btn compact" onclick="openDashboard()">← OPEN DASHBOARD</button>
+    <div class="hero-meta">
+      <span class="hero-chip">LIVE FEED</span>
+      <span class="hero-chip amber">EMAIL ALERTS</span>
+      <span class="hero-chip blue">CSV EXPORT</span>
+    </div>
+  </div>
+</section>
 
 <!-- ── STAT CARDS ── -->
 <div class="stats-grid">
@@ -448,7 +464,7 @@ function testEmail(){
   showSpStatus('ok','⏳ Sending test email…');
   emailjs.init({ publicKey:pubkey });
   emailjs.send(service,template,{
-    to_email:to, alert_type:'🧪 TEST ALERT — AgriFarm Honeypot',
+    to_email:to, alert_type:'🧪 TEST ALERT — AgriCloud Honeypot',
     activity:'This is a test alert from your honeypot monitor.',
     browser:navigator.userAgent.includes('Chrome')?'Chrome':'Browser',
     os:navigator.userAgent.includes('Windows')?'Windows':'OS',
@@ -474,6 +490,41 @@ function showToast(cls,title,msg,duration=4000){
 function removeToast(t){ if(!t||!t.parentElement) return; t.classList.add('out'); setTimeout(()=>t.remove(),300); }
 function showSpStatus(cls,msg){ const el=document.getElementById('sp-status'); if(!el) return; el.className='sp-status '+cls+' show'; el.textContent=msg; }
 function set(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+
+function csvEscape(value) {
+  return '"' + String(value ?? '').replace(/"/g, '""') + '"';
+}
+
+function openDashboard() {
+  window.location.href = 'honeypot_dashboard.html';
+}
+
+function exportCsv() {
+  let saved = [];
+  try {
+    saved = JSON.parse(localStorage.getItem(FAKE_KEY) || '[]');
+  } catch (err) {
+    saved = [];
+  }
+
+  const keys = ['ts', 'type', 'activity', 'section', 'browser', 'os', 'device', 'screen', 'tz', 'lang', 'page', 'user'];
+  const header = ['Timestamp', 'Type', 'Activity', 'Section', 'Browser', 'OS', 'Device', 'Screen', 'Timezone', 'Language', 'Page', 'User'];
+  const rows = [
+    header,
+    ...saved.map(entry => keys.map(key => entry[key] ?? '')),
+  ].map(row => row.map(csvEscape).join(',')).join('\r\n');
+
+  const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `honeypot-monitoring-feed-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast('g','📄 CSV DOWNLOADED','Monitoring feed exported as CSV',3500);
+}
 </script>
 </body>
 </html>

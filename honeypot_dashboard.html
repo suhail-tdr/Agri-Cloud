@@ -17,14 +17,30 @@
     <div class="topbar-tag">AGRICULTURE THREAT INTELLIGENCE SYSTEM</div>
   </div>
   <div class="topbar-right">
-    <div><span style="color:var(--text-dim)">NODE:</span> AGRI-CLUSTER-07</div>
-    <div><span style="color:var(--text-dim)">PORT:</span> <span style="color:var(--amber)">8888</span></div>
-    <div id="clock-top" style="color:var(--text)">--:--:--</div>
+    <div><span class="ui-label">NODE:</span> AGRI-CLUSTER-07</div>
+    <div><span class="ui-label">PORT:</span> <span class="ui-amber">8888</span></div>
+    <div id="clock-top" class="ui-clock">--:--:--</div>
     <div class="live-badge"><div class="pulse-dot"></div>LIVE</div>
   </div>
 </div>
 
 <div class="main">
+
+  <section class="hero-panel">
+    <div>
+      <div class="hero-kicker">AGRICULTURE THREAT INTELLIGENCE</div>
+      <h1 class="hero-title">Honeypot Dashboard</h1>
+      <p class="hero-copy">Monitor active connections, measure attack pressure, and export a clean trail of activity with one click.</p>
+    </div>
+    <div class="hero-actions">
+      <button class="open-trap-btn compact" onclick="openTrap()">▶ OPEN MONITORING</button>
+      <div class="hero-meta">
+        <span class="hero-chip">LIVE FEED</span>
+        <span class="hero-chip amber">CSV EXPORT</span>
+        <span class="hero-chip blue">IP INTELLIGENCE</span>
+      </div>
+    </div>
+  </section>
 
   <!-- Stats -->
   <div class="stats-grid">
@@ -50,11 +66,6 @@
     </div>
   </div>
 
-  <!-- Open trap button -->
-  <button class="open-trap-btn" onclick="openTrap()">
-    ▶  OPEN HONEYPOT MONITORING
-  </button>
-
   <!-- Two column: log table + side panels -->
   <div class="three-col">
 
@@ -62,12 +73,13 @@
     <div class="panel">
       <div class="panel-head">
         <span>▶ LIVE CONNECTION LOG</span>
-        <div style="display:flex;gap:0.5rem;">
+        <div class="panel-actions">
+          <button class="ctrl-btn" onclick="exportCsv()">EXPORT CSV</button>
           <button class="ctrl-btn" onclick="simulateAttack()">SIM ATTACK</button>
           <button class="ctrl-btn danger" onclick="clearLogs()">CLEAR</button>
         </div>
       </div>
-      <div class="panel-body" style="padding:0;">
+      <div class="panel-body panel-body-compact">
         <div class="log-scroll">
           <table class="log-table">
             <thead><tr>
@@ -86,7 +98,7 @@
     </div>
 
     <!-- Right panels -->
-    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+    <div class="panel-stack">
 
       <!-- Threat gauge -->
       <div class="panel">
@@ -117,7 +129,7 @@
       <!-- Top IPs -->
       <div class="panel">
         <div class="panel-head"><span>TOP SOURCE IPs</span></div>
-        <div class="panel-body" style="padding:0.75rem 1.25rem;" id="ip-list">
+        <div class="panel-body panel-body-tight" id="ip-list">
           <div class="empty">AWAITING DATA</div>
         </div>
       </div>
@@ -220,6 +232,32 @@
         </td>
       </tr>`;
     }).join('');
+  }
+
+  function csvEscape(value) {
+    return '"' + String(value ?? '').replace(/"/g, '""') + '"';
+  }
+
+  function exportCsv() {
+    const rows = [
+      ['ID', 'Timestamp', 'Event', 'Operator ID', 'Status'],
+      ...logs.map(entry => {
+        const isDenied = entry.event === 'ACCESS_DENIED';
+        const isLoggedIn = entry.event === 'LOGIN_SUCCESS';
+        const status = isDenied ? 'LOGGED & DENIED' : (isLoggedIn ? 'LOGGED IN' : 'RECORDED');
+        return [entry.id, entry.ts, entry.event, entry.user, status];
+      }),
+    ].map(row => row.map(csvEscape).join(',')).join('\r\n');
+
+    const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `honeypot-dashboard-log-${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   // ── UPDATE STATS ─────────────────────────────────────────
